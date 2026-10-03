@@ -1,0 +1,235 @@
+{% extends "base.html" %}
+
+{% block title %}Scientific Data & Visualisations{% endblock %}
+
+{% block content %}
+<!-- Page Header Banner -->
+<header class="hero-editorial" style="background-image: url('{{ url_for('static', filename='img/post-bg.jpg') }}'); padding: 4rem 0 3rem;">
+  <div class="hero-overlay"></div>
+  <div class="container hero-content">
+    <div class="row">
+      <div class="col-lg-9">
+        <span class="badge-research">Scientific Data Explorations</span>
+        <h1 class="font-serif">Data & Tableau Visualisations</h1>
+        <p class="lead mb-0">
+          Interactive dashboards examining global oceanic plastic accumulation, particle drift dynamics, and historical gyre survey campaigns. Published and hosted via Tableau Public and institutional repositories.
+        </p>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- Main Visualizations Section -->
+<section class="py-4">
+  <div class="container">
+
+    <!-- Navigation Tabs for the 3 Dashboards -->
+    <div class="d-flex justify-content-center mb-4">
+      <ul class="nav nav-pills" id="vizPills" role="tablist">
+        <li class="nav-item">
+          <a class="nav-link active font-weight-bold px-3 py-2" id="tab-drift-tab" data-toggle="pill" href="#tab-drift" role="tab" aria-controls="tab-drift" aria-selected="true">
+            <i class="fas fa-water mr-1"></i> 1. Pacific Drift Analysis
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link font-weight-bold px-3 py-2" id="tab-global-tab" data-toggle="pill" href="#tab-global" role="tab" aria-controls="tab-global" aria-selected="false">
+            <i class="fas fa-globe-americas mr-1"></i> 2. Global Plastic Distribution
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link font-weight-bold px-3 py-2" id="tab-history-tab" data-toggle="pill" href="#tab-history" role="tab" aria-controls="tab-history" aria-selected="false">
+            <i class="fas fa-chart-line mr-1"></i> 3. Historical Gyre Records
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Tab Content Area -->
+    <div class="tab-content" id="vizPillsContent">
+      
+      <!-- Visualization 1: Pacific Drift -->
+      <div class="tab-pane fade show active" id="tab-drift" role="tabpanel" aria-labelledby="tab-drift-tab">
+        <div class="research-card mb-4">
+          <div class="research-card-header d-flex justify-content-between align-items-center">
+            <div>
+              <h5 class="mb-0 font-serif">Ocean Garbage Patch: Pacific Drift Modeling</h5>
+              <small class="text-muted">Tableau Workbook: <code>OceanGarbagePatch/Pacificdrift</code></small>
+            </div>
+            <a href="https://public.tableau.com/views/OceanGarbagePatch/Pacificdrift" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-primary">
+              <i class="fas fa-external-link-alt mr-1"></i> Open on Tableau Public
+            </a>
+          </div>
+          <div class="research-card-body p-3">
+            <p class="small text-muted mb-3">
+              This visualization examines Lagrangian hydrodynamic particle simulations tracking surface debris transport from coastal river discharge sources into the North Pacific Subtropical Convergence Zone.
+            </p>
+
+            <!-- Tableau Embed Container with Fallback -->
+            <div class='tableauPlaceholder' id='viz1606716779207' style='position: relative; min-height: 550px;'>
+              <noscript>
+                <a href='https://public.tableau.com/views/OceanGarbagePatch/Pacificdrift' target='_blank'>
+                  <img alt='Pacific Drift Visualization' src='https://public.tableau.com/static/images/Oc/OceanGarbagePatch/Pacificdrift/1_rss.png' style='border: none; max-width: 100%;' />
+                </a>
+              </noscript>
+              <object class='tableauViz' style='display:none;'>
+                <param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' />
+                <param name='embed_code_version' value='3' />
+                <param name='site_root' value='' />
+                <param name='name' value='OceanGarbagePatch/Pacificdrift' />
+                <param name='tabs' value='no' />
+                <param name='toolbar' value='yes' />
+                <param name='static_image' value='https://public.tableau.com/static/images/Oc/OceanGarbagePatch/Pacificdrift/1.png' />
+                <param name='animate_transition' value='yes' />
+                <param name='display_static_image' value='yes' />
+                <param name='display_spinner' value='yes' />
+                <param name='display_overlay' value='yes' />
+                <param name='display_count' value='yes' />
+                <param name='language' value='en' />
+                <param name='filter' value='publish=yes' />
+              </object>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Visualization 2: Global Plastic Data -->
+      <div class="tab-pane fade" id="tab-global" role="tabpanel" aria-labelledby="tab-global-tab">
+        <div class="research-card mb-4">
+          <div class="research-card-header d-flex justify-content-between align-items-center">
+            <div>
+              <h5 class="mb-0 font-serif">Global Ocean Plastic Data</h5>
+              <small class="text-muted">Tableau Workbook: <code>GlobalPlasticData/Globaldata</code></small>
+            </div>
+            <a href="https://public.tableau.com/views/GlobalPlasticData/Globaldata" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-primary">
+              <i class="fas fa-external-link-alt mr-1"></i> Open on Tableau Public
+            </a>
+          </div>
+          <div class="research-card-body p-3">
+            <p class="small text-muted mb-3">
+              Comparative global overview highlighting macro-debris versus micro-debris density distributions across the five primary oceanic gyres (North Pacific, South Pacific, North Atlantic, South Atlantic, and Indian Ocean).
+            </p>
+
+            <div class='tableauPlaceholder' id='viz1606717628657' style='position: relative; min-height: 550px;'>
+              <noscript>
+                <a href='https://public.tableau.com/views/GlobalPlasticData/Globaldata' target='_blank'>
+                  <img alt='Global Plastic Data' src='https://public.tableau.com/static/images/Gl/GlobalPlasticData/Globaldata/1_rss.png' style='border: none; max-width: 100%;' />
+                </a>
+              </noscript>
+              <object class='tableauViz' style='display:none;'>
+                <param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' />
+                <param name='embed_code_version' value='3' />
+                <param name='site_root' value='' />
+                <param name='name' value='GlobalPlasticData/Globaldata' />
+                <param name='tabs' value='no' />
+                <param name='toolbar' value='yes' />
+                <param name='static_image' value='https://public.tableau.com/static/images/Gl/GlobalPlasticData/Globaldata/1.png' />
+                <param name='animate_transition' value='yes' />
+                <param name='display_static_image' value='yes' />
+                <param name='display_spinner' value='yes' />
+                <param name='display_overlay' value='yes' />
+                <param name='display_count' value='yes' />
+                <param name='language' value='en' />
+                <param name='filter' value='publish=yes' />
+              </object>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Visualization 3: Historical Records -->
+      <div class="tab-pane fade" id="tab-history" role="tabpanel" aria-labelledby="tab-history-tab">
+        <div class="research-card mb-4">
+          <div class="research-card-header d-flex justify-content-between align-items-center">
+            <div>
+              <h5 class="mb-0 font-serif">Pacific Garbage Patch Historical Survey Records</h5>
+              <small class="text-muted">Tableau Workbook: <code>PacificGarbagePatch/HistoryData</code></small>
+            </div>
+            <a href="https://public.tableau.com/views/PacificGarbagePatch/HistoryData" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-primary">
+              <i class="fas fa-external-link-alt mr-1"></i> Open on Tableau Public
+            </a>
+          </div>
+          <div class="research-card-body p-3">
+            <p class="small text-muted mb-3">
+              Longitudinal analysis of net trawl expeditions between 1972 and 2015, tracing the exponential growth of microplastic particle counts per square kilometer across expedition tranches.
+            </p>
+
+            <div class='tableauPlaceholder' id='viz1606718515193' style='position: relative; min-height: 550px;'>
+              <noscript>
+                <a href='https://public.tableau.com/views/PacificGarbagePatch/HistoryData' target='_blank'>
+                  <img alt='Historical Data' src='https://public.tableau.com/static/images/Pa/PacificGarbagePatch/HistoryData/1_rss.png' style='border: none; max-width: 100%;' />
+                </a>
+              </noscript>
+              <object class='tableauViz' style='display:none;'>
+                <param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' />
+                <param name='embed_code_version' value='3' />
+                <param name='site_root' value='' />
+                <param name='name' value='PacificGarbagePatch/HistoryData' />
+                <param name='tabs' value='no' />
+                <param name='toolbar' value='yes' />
+                <param name='static_image' value='https://public.tableau.com/static/images/Pa/PacificGarbagePatch/HistoryData/1.png' />
+                <param name='animate_transition' value='yes' />
+                <param name='display_static_image' value='yes' />
+                <param name='display_spinner' value='yes' />
+                <param name='display_overlay' value='yes' />
+                <param name='display_count' value='yes' />
+                <param name='language' value='en' />
+              </object>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Scientific Provenance Card -->
+    <div class="research-card mb-4">
+      <div class="research-card-header">
+        <h6 class="mb-0 font-serif"><i class="fas fa-shield-alt text-success mr-2"></i> Embed Integrity & Offline Access Notice</h6>
+      </div>
+      <div class="research-card-body small text-muted">
+        <p class="mb-2">
+          <strong>Interactive Embeds:</strong> The dashboards embedded above utilize the official Tableau Public JavaScript API v1. If network firewalls or browser content blockers suppress the interactive canvas, each card provides a direct link to the published workbook on Tableau Public.
+        </p>
+        <p class="mb-0">
+          <strong>Original Packaged Workbook:</strong> The underlying datasets and calculated fields are also archived locally in the repository under <code>Master_Project_Tableau.twbx</code>.
+        </p>
+      </div>
+    </div>
+
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Dynamically initialize Tableau viz when tabs are switched
+function initTableauEmbed(containerId) {
+  var divElement = document.getElementById(containerId);
+  if (!divElement) return;
+  var vizElement = divElement.getElementsByTagName('object')[0];
+  if (vizElement) {
+    vizElement.style.width = '100%';
+    vizElement.style.height = (divElement.offsetWidth * 0.65) + 'px';
+    var scriptElement = document.createElement('script');
+    scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';
+    vizElement.parentNode.insertBefore(scriptElement, vizElement);
+  }
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  initTableauEmbed('viz1606716779207');
+  
+  // Initialize on tab switch
+  $('a[data-toggle="pill"]').on('shown.bs.tab', function (e) {
+    if (e.target.id === 'tab-global-tab') {
+      initTableauEmbed('viz1606717628657');
+    } else if (e.target.id === 'tab-history-tab') {
+      initTableauEmbed('viz1606718515193');
+    }
+  });
+});
+</script>
+{% endblock %}

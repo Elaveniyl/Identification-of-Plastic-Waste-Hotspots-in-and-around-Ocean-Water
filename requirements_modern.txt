@@ -1,0 +1,12 @@
+# Modernized Requirements for Python 3.13 on Windows
+# Verified compatible with Python 3.13.15, Flask 3.x, and SQLAlchemy 2.x
+
+Flask>=3.1.0
+Flask-SQLAlchemy>=3.1.0
+SQLAlchemy>=2.0.0
+Pillow>=10.0.0
+numpy>=2.0.0
+onnxruntime>=1.20.0
+opencv-python-headless>=4.10.0
+Werkzeug>=3.1.0
+Jinja2>=3.1.0

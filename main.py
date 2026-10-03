@@ -1,142 +1,264 @@
+"""
+Main Application: AI-GIS Detection and Prioritisation of Plastic Waste Hotspots
+Flask server integrating image classification, GIS hotspot prioritisation, and FLA lifecycle automata.
+"""
+
+import json
+import os
+from datetime import datetime, timezone
+from pathlib import Path
 from flask import Flask, render_template, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
+
 from util import base64_to_pil
-import tensorflow.compat.v1 as tf
-tf.disable_v2_behavior()
-import json
+from prediction_service import prediction_service
+from hotspot_service import hotspot_service
+from observation_fsm import WasteObservationFSM, InvalidTransitionError
 
-with open('config.json','r') as c:
-    params = json.load(c)["params"]
+PROJECT_ROOT = Path(__file__).parent.resolve()
+CONFIG_FILE = PROJECT_ROOT / "config.json"
 
-local_server = "True"
+# Load database configuration safely
+params = {}
+if CONFIG_FILE.exists():
+    try:
+        with open(CONFIG_FILE, "r", encoding="utf-8") as c:
+            params = json.load(c).get("params", {})
+    except Exception as e:
+        print(f"[WARN] Failed to load config.json: {e}")
 
 app = Flask(__name__)
-if local_server:
-    app.config['SQLALCHEMY_DATABASE_URI'] = params["local_uri"]
-else:
-    app.config['SQLALCHEMY_DATABASE_URI'] = params["prod_uri"]
+
+# Configure Database URI with SQLite local fallback
+db_uri = os.environ.get("DATABASE_URI") or params.get("db_uri") or f"sqlite:///{PROJECT_ROOT / 'contact.db'}"
+app.config["SQLALCHEMY_DATABASE_URI"] = db_uri
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
 db = SQLAlchemy(app)
 
 
 class Contact(db.Model):
-    S_No = db.Column(db.Integer, primary_key=True)
-    Name = db.Column(db.String(80), unique=False, nullable=False)
-    Date = db.Column(db.String(12), unique=False, nullable=True)
-    Email = db.Column(db.String(35), unique=False, nullable=False)
-    Phone = db.Column(db.String(12), unique=False, nullable=False)
-    Message = db.Column(db.String(120), unique=False, nullable=False)
+    """Contact feedback messages table."""
+    __tablename__ = "contact"
+    SNo = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    Name = db.Column(db.String(80), nullable=False)
+    Date = db.Column(db.DateTime, default=datetime.utcnow)
+    Email = db.Column(db.String(80), nullable=False)
+    Phone = db.Column(db.String(20), nullable=False)
+    Message = db.Column(db.String(500), nullable=False)
 
+
+# Initialize SQLite tables safely at startup
+try:
+    with app.app_context():
+        db.create_all()
+except Exception as e:
+    print(f"[WARN] Database initialization notice: {e}")
+
+
+# ============================================================================
+# Frontend Web Routes
+# ============================================================================
 
 @app.route("/")
 def home():
-    return render_template('index.html')
+    return render_template("index.html")
 
 
-@app.route("/contact", methods=['Get', 'Post'])
+@app.route("/contact", methods=["GET", "POST"])
 def contact():
-    if request.method == 'POST':
-        name = request.form.get('name')
-        email = request.form.get('email')
-        phone = request.form.get('phone')
-        message = request.form.get('msg')
-        entry = Contact(Name=name, Phone=phone, Message=message, Date=datetime.now(), Email=email)
-        db.session.add(entry)
-        db.session.commit()
+    status_msg = None
+    if request.method == "POST":
+        try:
+            name = request.form.get("name", "").strip()
+            email = request.form.get("email", "").strip()
+            phone = request.form.get("phone", "").strip()
+            message = request.form.get("msg", "").strip()
 
-    return render_template('contact.html')
+            if name and email and message:
+                entry = Contact(Name=name, Phone=phone, Message=message, Date=datetime.now(timezone.utc), Email=email)
+                db.session.add(entry)
+                db.session.commit()
+                status_msg = "Thank you! Your message has been received."
+            else:
+                status_msg = "Please fill out all required fields."
+        except Exception as e:
+            db.session.rollback()
+            status_msg = f"Notice: Message could not be recorded ({str(e)})"
+
+    return render_template("contact.html", status_msg=status_msg)
 
 
 @app.route("/mission")
 def mission():
-    return render_template('mission.html')
+    return render_template("mission.html")
 
 
 @app.route("/team")
 def team():
-    return render_template('team.html')
+    return render_template("team.html")
 
 
 @app.route("/object")
 def object():
-    return render_template('hotspot1.html')
+    return render_template("hotspot1.html")
 
 
 @app.route("/hotspot")
 def hotspot():
-    return render_template('hotspot.html')
+    return render_template("hotspot.html")
 
-@app.route('/predict', methods=['GET', 'POST'])
+
+@app.route("/automata")
+def automata():
+    return render_template("automata.html")
+
+
+@app.route("/visualizations")
+def visualizations():
+    return render_template("visualizations.html")
+
+
+@app.route("/about")
+def about():
+    return render_template("about.html")
+
+
+# ============================================================================
+# API Routes: Prediction, GIS Prioritisation, and FLA Automata
+# ============================================================================
+
+@app.route("/predict", methods=["GET", "POST"])
 def predict():
-    if request.method == 'POST':
-        # Get the image from post request
-        img = base64_to_pil(request.json)
-        # Save the image to ./uploads
-        img.save("/var/www/FlaskApp/FlaskApp/tf_files/image.png")
-        img = img.resize((224, 224))
-        print("image saved")
-        # Make prediction
-        #preds = model_predict(img)
+    """
+    Image prediction endpoint.
+    Accepts base64 encoded image data, preprocesses for Inception v3 (299x299),
+    and queries the singleton prediction service.
+    """
+    if request.method == "GET":
+        return jsonify(prediction_service.get_status())
 
-        # Preprocessing the image
-        #x = image.img_to_array(img)
-        # x = np.true_divide(x, 255)
-        #x = np.expand_dims(x, axis=0)
+    payload = request.get_json(silent=True)
+    if not payload:
+        return jsonify(error="No JSON payload received", status="error"), 400
 
-        # Be careful how your trained model deals with the input
-        # otherwise, it won't make correct prediction!
-        #x = preprocess_input(x, mode='tf')
+    if isinstance(payload, dict):
+        img_data = payload.get("image") or payload.get("data")
+    else:
+        img_data = payload
 
-        #preds = model.predict(x)
-        #!!!!!!!!!!!!!!!!
-        image_data = tf.io.gfile.GFile("/var/www/FlaskApp/FlaskApp/tf_files/image.png", 'rb').read()
-        print("Image read")
-        label_lines = [line.rstrip() for line
-                           in tf.io.gfile.GFile("/var/www/FlaskApp/FlaskApp/tf_files/retrained_labels.txt")]
+    if not img_data or not isinstance(img_data, str):
+        return jsonify(error="Missing or invalid base64 image data", status="error"), 400
 
-        print("Implementing model")
+    try:
+        pil_img = base64_to_pil(img_data)
+    except ValueError as ve:
+        return jsonify(error=str(ve), status="error"), 400
+    except Exception as e:
+        return jsonify(error=f"Image decoding failed: {str(e)}", status="error"), 400
 
-        # Unpersists graph from file
-        with tf.io.gfile.GFile("/var/www/FlaskApp/FlaskApp/tf_files/retrained_graph.pb", 'rb') as f:
-            graph_def = tf.compat.v1.GraphDef()
-            graph_def.ParseFromString(f.read())
-            _ = tf.import_graph_def(graph_def, name='')
+    res = prediction_service.predict(pil_img)
 
-        print("Model")
+    if res.get("status") == "success":
+        return jsonify(
+            result=res.get("result"),
+            status="success",
+            predictions=res.get("predictions")
+        )
+    elif res.get("status") == "unavailable":
+        return jsonify(
+            result="Inference Unavailable",
+            status="unavailable",
+            error=res.get("error"),
+            detail=res.get("detail"),
+            remediation=res.get("remediation"),
+            expected_dimensions=res.get("expected_dimensions"),
+            labels=res.get("labels")
+        ), 503
+    else:
+        return jsonify(error=res.get("error", "Prediction failed"), status="error"), res.get("http_status", 400)
 
-        with tf.compat.v1.Session() as sess:
-            # Feed the image_data as input to the graph and get first prediction
-            softmax_tensor = sess.graph.get_tensor_by_name('final_result:0')
-            
-            predictions = sess.run(softmax_tensor,
-                     {'DecodeJpeg/contents:0': image_data})
 
-            print("Making Predictions")
-            
-            # Sort to show labels of first prediction in order of confidence
-            top_k = predictions[0].argsort()[-len(predictions[0]):][::-1]
-            
-            for node_id in top_k:
-                human_string = label_lines[node_id]
-                score = predictions[0][node_id]
-                if human_string == 'plastic':
-                    #print(str(score))
-                    score = score*100
-                    score = "{:.2f}".format(score)
-                    result ="Plastic-" + str(score)
-                    #print('%s (score = %.2f)' % (human_string, score))
-        # Process your result for human
-        #pred_proba = "{:.3f}".format(np.amax(preds))    # Max probability
-        #pred_class = decode_predictions(preds, top=1)   # ImageNet Decode
+@app.route("/api/hotspots", methods=["GET"])
+def api_hotspots():
+    """Returns ranked GIS observations from Laurent Lebreton et al. (2018) dataset."""
+    tier = request.args.get("tier")
+    inside_gpgp_arg = request.args.get("inside_gpgp")
+    inside_gpgp = int(inside_gpgp_arg) if inside_gpgp_arg in ("0", "1") else None
+    limit = min(int(request.args.get("limit", 200)), 1000)
 
-        #result = str(pred_class[0][0][1])               # Convert to string
-        #result = result.replace('_', ' ').capitalize()
-        #score = str(score)
-        #result ="Plastic-" + str(score)
-        print(result,"as")
-        # Serialize the result, you can add additional fields
-        return jsonify(result=result)
+    hotspots = hotspot_service.get_hotspots(tier=tier, inside_gpgp=inside_gpgp, limit=limit)
+    return jsonify(count=len(hotspots), hotspots=hotspots)
 
-    return None
 
-app.run(host = '0.0.0.0', port = 5000, debug=True)  # Debug= True will give you latest output without running code again and again
+@app.route("/api/hotspots/stats", methods=["GET"])
+def api_hotspot_stats():
+    """Returns statistical distribution of the ocean plastic survey dataset."""
+    return jsonify(hotspot_service.get_summary_stats())
+
+
+@app.route("/api/hotspots/clusters", methods=["GET"])
+def api_hotspot_clusters():
+    """Returns spatial grid clusters (macro accumulation hotspots)."""
+    grid_size = float(request.args.get("grid_size", 5.0))
+    clusters = hotspot_service.get_spatial_clusters(grid_size=grid_size)
+    return jsonify(count=len(clusters), grid_size_deg=grid_size, clusters=clusters)
+
+
+@app.route("/api/fsm/spec", methods=["GET"])
+def api_fsm_spec():
+    """Returns the formal 5-tuple specification of the FLA observation automaton."""
+    return jsonify(
+        formal_specification={
+            "states_Q": sorted(WasteObservationFSM.STATES),
+            "alphabet_Sigma": sorted(WasteObservationFSM.ALPHABET),
+            "start_state_q0": WasteObservationFSM.INITIAL_STATE,
+            "accepting_states_F": sorted(WasteObservationFSM.ACCEPTING_STATES),
+            "transition_rules_delta": [
+                {"from_state": src, "input_symbol": sym, "to_state": dest}
+                for (src, sym), dest in sorted(WasteObservationFSM.TRANSITIONS.items())
+            ]
+        }
+    )
+
+
+@app.route("/api/fsm/transition", methods=["POST"])
+def api_fsm_transition():
+    """Executes a formal DFA state transition."""
+    data = request.get_json(silent=True) or {}
+    current_state = data.get("current_state", "DRAFT")
+    symbol = data.get("symbol")
+
+    if not symbol:
+        return jsonify(error="Missing required field 'symbol'", status="error"), 400
+
+    try:
+        fsm = WasteObservationFSM(initial_state=current_state)
+        next_state = fsm.transition(symbol)
+        return jsonify(
+            status="success",
+            previous_state=current_state,
+            symbol=symbol,
+            next_state=next_state,
+            is_accepted=fsm.is_accepted(),
+            valid_next_inputs=list(fsm.get_valid_transitions().keys())
+        )
+    except (ValueError, InvalidTransitionError) as e:
+        return jsonify(
+            status="error",
+            error=str(e),
+            current_state=current_state,
+            symbol=symbol
+        ), 400
+
+
+# ============================================================================
+# Main Entry Point
+# ============================================================================
+
+if __name__ == "__main__":
+    host = os.environ.get("HOST", "127.0.0.1")
+    port = int(os.environ.get("PORT", 5000))
+    debug = os.environ.get("DEBUG", "True").lower() in ("true", "1")
+    print(f"Starting Plastic Waste Hotspot Server on http://{host}:{port}")
+    app.run(host=host, port=port, debug=debug)

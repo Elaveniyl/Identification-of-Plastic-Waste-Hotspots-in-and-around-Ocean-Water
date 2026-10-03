@@ -1,13 +1,7 @@
 {
-  "params":
-  {
-    "local_server": "True",
-    "local_uri": "mysql://root:@localhost/stop marine pollution",
-    "prod_uri": "mysql://root:@localhost/stop marine pollution"
+  "params": {
+    "local_server": true,
+    "db_uri": "sqlite:///contact.db",
+    "mysql_uri": "mysql://root:@localhost/stop_marine_pollution"
   }
-
-
-
-
-
 }

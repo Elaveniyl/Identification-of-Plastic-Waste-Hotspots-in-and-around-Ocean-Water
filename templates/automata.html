@@ -1,0 +1,367 @@
+{% extends "base.html" %}
+
+{% block title %}Formal Languages & Automata (FLA) Simulator{% endblock %}
+
+{% block extra_head %}
+<style>
+  .fsm-graph-container {
+    background: #0d1e33;
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    color: #ffffff;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+  }
+  .fsm-node-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 0.6rem;
+    border: 2px solid #334155;
+    border-radius: 8px;
+    background: #1e293b;
+    color: #94a3b8;
+    font-weight: 600;
+    font-size: 0.8rem;
+    transition: all 0.25s ease;
+    text-align: center;
+    min-height: 64px;
+  }
+  .fsm-node-box.active {
+    border-color: #38bdf8;
+    background: #0284c7;
+    color: #ffffff;
+    box-shadow: 0 0 16px rgba(56, 189, 248, 0.45);
+    transform: scale(1.05);
+  }
+  .fsm-node-box.accepting {
+    border-style: double;
+    border-width: 4px;
+    border-color: #34d399;
+  }
+  .fsm-node-box.accepting.active {
+    background: #059669;
+    color: #ffffff;
+    box-shadow: 0 0 16px rgba(52, 211, 153, 0.45);
+  }
+  .fsm-node-box.rejected {
+    border-color: #f87171;
+  }
+  .fsm-node-box.rejected.active {
+    background: #dc2626;
+    color: #ffffff;
+    box-shadow: 0 0 16px rgba(248, 113, 113, 0.45);
+  }
+  .fsm-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+    font-size: 1.1rem;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header Banner -->
+<header class="hero-editorial" style="background-image: url('{{ url_for('static', filename='img/home2.jpg') }}'); padding: 4rem 0 3rem;">
+  <div class="hero-overlay"></div>
+  <div class="container hero-content">
+    <div class="row">
+      <div class="col-lg-9">
+        <span class="badge-research">Formal Methods & Automata Theory</span>
+        <h1 class="font-serif">Observation Lifecycle State Machine</h1>
+        <p class="lead mb-0">
+          A Deterministic Finite Automaton (DFA) $M = (Q, \Sigma, \delta, q_0, F)$ governing the rigorous state transitions of an environmental ocean waste record from initial ingestion through spatial tagging, operator validation, cleanup dispatch, and final archival.
+        </p>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- Main Automata Section -->
+<section class="py-4">
+  <div class="container">
+    
+    <!-- Visual State Graph -->
+    <div class="research-card mb-4">
+      <div class="research-card-header d-flex justify-content-between align-items-center">
+        <span class="font-serif"><i class="fas fa-project-diagram text-primary mr-2"></i> Topological State Transition Graph</span>
+        <span class="badge badge-info">Formal 5-Tuple DFA</span>
+      </div>
+      <div class="research-card-body p-4">
+        
+        <div class="fsm-graph-container mb-3">
+          <div class="row align-items-center mb-3">
+            <div class="col-md-3 col-6 mb-2">
+              <div class="fsm-node-box active" id="node_DRAFT">
+                <span>DRAFT</span>
+                <small class="text-light" style="font-size: 0.68rem;">q₀ (Initial)</small>
+              </div>
+            </div>
+            <div class="col-md-1 d-none d-md-flex fsm-arrow"><i class="fas fa-arrow-right"></i></div>
+            <div class="col-md-3 col-6 mb-2">
+              <div class="fsm-node-box" id="node_GEO_TAGGED">
+                <span>GEO_TAGGED</span>
+                <small style="font-size: 0.68rem;">Spatial Locked</small>
+              </div>
+            </div>
+            <div class="col-md-1 d-none d-md-flex fsm-arrow"><i class="fas fa-arrow-right"></i></div>
+            <div class="col-md-3 col-6 mb-2">
+              <div class="fsm-node-box" id="node_HOTSPOT_FLAGGED">
+                <span>HOTSPOT_FLAGGED</span>
+                <small style="font-size: 0.68rem;">HPI &ge; 70</small>
+              </div>
+            </div>
+          </div>
+
+          <div class="row align-items-center mb-3">
+            <div class="col-md-3 col-6 mb-2">
+              <div class="fsm-node-box" id="node_CLASSIFIED">
+                <span>CLASSIFIED</span>
+                <small style="font-size: 0.68rem;">Vision Tagged</small>
+              </div>
+            </div>
+            <div class="col-md-1 d-none d-md-flex fsm-arrow"><i class="fas fa-arrow-right"></i></div>
+            <div class="col-md-3 col-6 mb-2">
+              <div class="fsm-node-box" id="node_VERIFIED">
+                <span>VERIFIED</span>
+                <small style="font-size: 0.68rem;">Human Approved</small>
+              </div>
+            </div>
+            <div class="col-md-1 d-none d-md-flex fsm-arrow"><i class="fas fa-arrow-right"></i></div>
+            <div class="col-md-3 col-6 mb-2">
+              <div class="fsm-node-box" id="node_DISPATCHED">
+                <span>DISPATCHED</span>
+                <small style="font-size: 0.68rem;">Vessel Active</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- Terminal Accepting / Rejection States -->
+          <div class="row pt-2 border-top border-secondary">
+            <div class="col-md-6 col-12 mb-2">
+              <div class="fsm-node-box accepting" id="node_ARCHIVED">
+                <span class="text-success"><i class="fas fa-check-circle mr-1"></i> ARCHIVED</span>
+                <small class="text-success" style="font-size: 0.68rem;">F (Accepting / Cleaned)</small>
+              </div>
+            </div>
+            <div class="col-md-6 col-12 mb-2">
+              <div class="fsm-node-box rejected" id="node_REJECTED">
+                <span class="text-danger"><i class="fas fa-times-circle mr-1"></i> REJECTED</span>
+                <small class="text-danger" style="font-size: 0.68rem;">F (Accepting / Invalidation)</small>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="d-flex flex-wrap justify-content-between small text-muted">
+          <div><i class="fas fa-circle text-primary mr-1"></i> <strong>Active State:</strong> Highlighted blue glow</div>
+          <div><i class="fas fa-circle text-success mr-1"></i> <strong>Accepting State (F):</strong> Double border (ARCHIVED)</div>
+          <div><i class="fas fa-circle text-danger mr-1"></i> <strong>Rejection Terminal (F):</strong> Double border (REJECTED)</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Simulator Control & Trace Console Row -->
+    <div class="row">
+      <!-- Interactive Input Symbol Console -->
+      <div class="col-lg-6 mb-4">
+        <div class="research-card h-100">
+          <div class="research-card-header d-flex justify-content-between align-items-center">
+            <h6 class="mb-0 font-serif"><i class="fas fa-terminal text-primary mr-2"></i> State Transition Controller</h6>
+            <button class="btn btn-sm btn-outline-secondary" onclick="resetFsm()"><i class="fas fa-undo mr-1"></i> Reset to q₀</button>
+          </div>
+          <div class="research-card-body">
+            
+            <div class="p-3 mb-3 bg-light rounded border text-center">
+              <small class="text-muted d-block text-uppercase letter-spacing-1 font-weight-bold">Current State ($q$)</small>
+              <div class="h3 font-serif mb-0 text-primary" id="fsmCurrentState">DRAFT</div>
+              <div id="stateStatusBadge" class="mt-1">
+                <span class="badge badge-info">Transient State</span>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="font-weight-bold small text-muted text-uppercase d-block mb-2">Available Input Symbols ($\Sigma$):</label>
+              <div id="fsmActionButtons" class="d-flex flex-wrap">
+                <!-- Injected via JavaScript -->
+              </div>
+            </div>
+
+            <div id="fsmFeedback" class="small mb-3" style="min-height: 24px;"></div>
+
+            <div class="alert alert-light border small text-muted mb-0">
+              <i class="fas fa-info-circle mr-1 text-info"></i> Clicking an input symbol invokes the deterministic transition function $\delta(q, \sigma) \to q'$ via the backend endpoint <code>/api/fsm/transition</code>.
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Execution Trace History -->
+      <div class="col-lg-6 mb-4">
+        <div class="research-card h-100">
+          <div class="research-card-header d-flex justify-content-between align-items-center">
+            <h6 class="mb-0 font-serif"><i class="fas fa-history text-secondary mr-2"></i> Operational Transition Log</h6>
+            <small class="text-muted" id="transitionStepCount">0 Transitions</small>
+          </div>
+          <div class="research-card-body">
+            <div class="fsm-trace-console mb-3">
+              <ol id="fsmTraceList" class="pl-3 mb-0">
+                <li>[INIT] Automaton initialized in initial state q₀ = DRAFT</li>
+              </ol>
+            </div>
+            
+            <p class="small text-muted mb-0">
+              Each state transition represents an audited milestone in the physical and computational lifecycle of a plastic debris field report.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mathematical Specification Card -->
+    <div class="research-card mb-4">
+      <div class="research-card-header">
+        <h6 class="mb-0 font-serif"><i class="fas fa-square-root-alt text-primary mr-2"></i> Formal DFA 5-Tuple Definition: $M = (Q, \Sigma, \delta, q_0, F)$</h6>
+      </div>
+      <div class="research-card-body small">
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <h6 class="font-weight-bold text-dark mb-2">1. Set of States ($Q$)</h6>
+            <p class="text-muted mb-3">
+              $$Q = \{\text{DRAFT, GEO\_TAGGED, CLASSIFIED, HOTSPOT\_FLAGGED, VERIFIED, DISPATCHED, ARCHIVED, REJECTED}\}$$
+            </p>
+
+            <h6 class="font-weight-bold text-dark mb-2">2. Input Alphabet ($\Sigma$)</h6>
+            <p class="text-muted mb-0">
+              $$\Sigma = \{\text{add\_coords, classify\_image, flag\_hotspot, operator\_verify, dispatch\_cleanup, complete\_archive, invalidate}\}$$
+            </p>
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <h6 class="font-weight-bold text-dark mb-2">3. Initial & Accepting States</h6>
+            <ul class="list-unstyled text-muted mb-3">
+              <li>&bull; <strong>Initial State ($q_0$):</strong> $\text{DRAFT} \in Q$</li>
+              <li>&bull; <strong>Accepting States ($F$):</strong> $\{\text{ARCHIVED, REJECTED}\} \subset Q$</li>
+            </ul>
+
+            <h6 class="font-weight-bold text-dark mb-2">4. Transition Invariant Guarantees</h6>
+            <p class="text-muted mb-0">
+              Any attempt to execute an undefined transition $\delta(q, \sigma) = \emptyset$ is formally rejected with an <code>InvalidTransitionError</code> (HTTP 400), preventing unauthorized state progression.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let currentFsmState = "DRAFT";
+let transitionSteps = 0;
+
+const fsmTransitions = {
+  "DRAFT": ["add_coords", "classify_image", "invalidate"],
+  "GEO_TAGGED": ["classify_image", "flag_hotspot", "operator_verify", "invalidate"],
+  "CLASSIFIED": ["add_coords", "operator_verify", "invalidate"],
+  "HOTSPOT_FLAGGED": ["operator_verify", "dispatch_cleanup", "invalidate"],
+  "VERIFIED": ["dispatch_cleanup", "complete_archive", "invalidate"],
+  "DISPATCHED": ["complete_archive", "invalidate"],
+  "ARCHIVED": [],
+  "REJECTED": []
+};
+
+function updateNodeHighlights(state) {
+  const allNodes = document.querySelectorAll('.fsm-node-box');
+  allNodes.forEach(n => n.classList.remove('active'));
+
+  const activeNode = document.getElementById(`node_${state}`);
+  if (activeNode) {
+    activeNode.classList.add('active');
+  }
+
+  // Update status badge
+  const badgeEl = document.getElementById('stateStatusBadge');
+  if (state === 'ARCHIVED') {
+    badgeEl.innerHTML = '<span class="badge badge-success py-1 px-2">Accepted: Lifecycle Complete (Cleaned & Archived)</span>';
+  } else if (state === 'REJECTED') {
+    badgeEl.innerHTML = '<span class="badge badge-danger py-1 px-2">Terminal: Observation Invalidated / Discarded</span>';
+  } else {
+    badgeEl.innerHTML = '<span class="badge badge-info py-1 px-2">Transient State: Processing In-Progress</span>';
+  }
+}
+
+function refreshFsmButtons() {
+  document.getElementById('fsmCurrentState').innerText = currentFsmState;
+  updateNodeHighlights(currentFsmState);
+
+  const container = document.getElementById('fsmActionButtons');
+  container.innerHTML = '';
+
+  const symbols = fsmTransitions[currentFsmState] || [];
+  if (symbols.length === 0) {
+    container.innerHTML = '<span class="badge badge-success p-2"><i class="fas fa-check mr-1"></i> Terminal State Reached ($q \\in F$). No further transitions allowed.</span>';
+    return;
+  }
+
+  symbols.forEach(sym => {
+    const btn = document.createElement('button');
+    btn.className = 'btn btn-sm mr-2 mb-2 ' + (sym === 'invalidate' ? 'btn-outline-danger' : 'btn-outline-primary');
+    btn.innerHTML = `<code>${sym}</code>`;
+    btn.onclick = () => sendFsmTransition(sym);
+    container.appendChild(btn);
+  });
+}
+
+function sendFsmTransition(symbol) {
+  fetch('/api/fsm/transition', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ current_state: currentFsmState, symbol: symbol })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.status === 'success') {
+      currentFsmState = data.next_state;
+      transitionSteps++;
+      document.getElementById('transitionStepCount').innerText = `${transitionSteps} Transitions`;
+      document.getElementById('fsmFeedback').innerHTML = `<span class="text-success"><i class="fas fa-arrow-right mr-1"></i> &delta;(${data.previous_state}, ${data.symbol}) &rarr; <strong>${data.next_state}</strong></span>`;
+      
+      const li = document.createElement('li');
+      li.innerText = `Step ${transitionSteps}: [${data.previous_state}] --(${data.symbol})--> [${data.next_state}]`;
+      document.getElementById('fsmTraceList').appendChild(li);
+      
+      // Auto-scroll trace console to bottom
+      const consoleBox = document.querySelector('.fsm-trace-console');
+      if (consoleBox) consoleBox.scrollTop = consoleBox.scrollHeight;
+
+      refreshFsmButtons();
+    } else {
+      document.getElementById('fsmFeedback').innerHTML = `<span class="text-danger"><i class="fas fa-times mr-1"></i> Transition Rejected: ${data.error}</span>`;
+    }
+  })
+  .catch(err => {
+    document.getElementById('fsmFeedback').innerHTML = `<span class="text-danger">Network error executing transition.</span>`;
+  });
+}
+
+function resetFsm() {
+  currentFsmState = "DRAFT";
+  transitionSteps = 0;
+  document.getElementById('transitionStepCount').innerText = '0 Transitions';
+  document.getElementById('fsmTraceList').innerHTML = '<li>[RESET] Automaton reset to initial state q₀ = DRAFT</li>';
+  document.getElementById('fsmFeedback').innerHTML = '<span class="text-muted">Automaton reset successfully.</span>';
+  refreshFsmButtons();
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  refreshFsmButtons();
+});
+</script>
+{% endblock %}

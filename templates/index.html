@@ -1,220 +1,239 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %}
 
-<head>
+{% block title %}AI-GIS Detection and Prioritisation of Plastic Waste Hotspots{% endblock %}
 
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta name="description" content="">
-  <meta name="author" content="">
-
-  <title>Stop Marine Pollution</title>
-
-  <!-- Bootstrap core CSS -->
-  <link href= "{{  url_for('static', filename='vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
-
-  <!-- Custom fonts for this template -->
-  <link href="{{  url_for('static', filename='vendor/fontawesome-free/css/all.min.css')}}" rel="stylesheet" type="text/css">
-  <link href="{{  url_for('static', filename= 'https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic')}}" rel='stylesheet' type='text/css'>
-  <link href="{{  url_for('static', filename='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800')}}" rel='stylesheet' type='text/css'>
-
-  <!-- Custom styles for this template -->
-  <link href="{{  url_for('static', filename='css/clean-blog.min.css')}}" rel="stylesheet">
-
-</head>
-
-<body>
-
-  <!-- Navigation -->
-  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
-      <div class="col-sm-4 col-xs-8">
-
-                     <a class="navbar-brand" href="/">
-                  <img class="w-24 h-24 rounded-full shadow-md" src="{{ url_for('static',filename='asd.jpg') }}" style="width:160px;height:150px;background: transparent;border-radius:9999px;"/></a>
-              
-          
-      </div>
-    <div class="container">
-      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
-        Menu
-               <i class="fas fa-bars"></i>
-             </button>
-             <div class="collapse navbar-collapse" id="navbarResponsive">
-               <ul class="navbar-nav ml-auto">
-                 <li class="nav-item">
-                   <a class="nav-link" href="/">Home</a>
-                 </li>
-
-
-                 <li class="nav-item dropdown">
-                   <a class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">About</a>
-                   <div class="dropdown-menu">
-                       <a class="dropdown-item" href="/mission">Mission</a>
-                       <a class="dropdown-item" href="/team">Our Team</a>
-                       <div class="dropdown-divider"></div>
-                   </div>
-                 </li>
-
-
-                 <li class="nav-item dropdown">
-                   <a class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Projects</a>
-                   <div class="dropdown-menu">
-                       <a class="dropdown-item" href="/object">Plastic Object Detection</a>
-                       <a class="dropdown-item" href="/hotspot">Plastic Hotspot Detection</a>
-                       <div class="dropdown-divider"></div>
-                   </div>
-                 </li>
-
-
-                 <li class="nav-item">
-                   <a class="nav-link" href="/contact">Contact</a>
-                 </li>
-               </ul>
-             </div>
-           </div>
-         </nav>
-
-         <!-- Page Header -->
-         <header class="masthead" style="background-image: url('{{url_for('static',filename='img/Home.jpg')}}')">
-           <div class="overlay"></div>
-           <div class="container">
-             <div class="row">
-               <div class="col-lg-8 col-md-10 mx-auto">
-                 <div class="site-heading" font-family: Raleway>
-                   <h2>IDENTIFICATION OF PLASTIC WASTE HOTSPOTS IN AND AROUND OCEAN WATER TO HELP MITIGATE THE WATER POLLUTION</h2>
-                   <span class="subheading">A Machine Learning Project</span>
-                 </div>
-               </div>
-             </div>
-           </div>
-         </header>
-
-
-
-         <!-- Main Content -->
-         <div class="container">
-
-           <div class="row">
-             <div class="col-md-15 mb-5">
-               <h2>There are approx. 5.25 trillion pieces of plastic waste estimated to be in our oceans. We aim to identify plastic hotspots in and around ocean water to help reduce the plastic pollution.</h2>
-               <hr>
-               <p><ul>
-                   <li>Plastic ocean pollution is a type of marine litter that damages and destroys marine life, develops toxins and is dangerous to human health.    </li>
-                   <li>Every year, around 8 million metric tons of plastic end up in our oceans.    </li>
-                   <li>Statistics say that more than 100,000 aquatic animals and birds die each year by plastics being tangled in their bodies.</li>
-                   <li>Plastic pollution has a deleterious effect on aquatic life. A study predicted that by 2050, there will be more plastic than fish in the oceans if no steps are taken to mitigate the flow of plastics into waterways.</li>
-                   <li>Lack of ocean protection will not only accelerate climate change, it could impact our resilience to its impacts.</li>
-               </ul></p>
-               <a class="btn btn-primary btn-lg" href="https://www.youtube.com/watch?v=Sp572udnPVg" target = "_blank">Find Out More! &raquo;</a>
-               <p><br><h2> The ocean is the life support system of our planet! </h2></p>
-             </div>
-           </div>
-           <!-- /.row -->
-           <div class="row">
-
-             <div class="col-md-4 mb-5">
-               <div class="card h-100">
-                 <img class="card-img-top" src="{{url_for('static',filename='img/healthy.jpg')}}" height="250" width="300" alt="">
-                 <div class="card-body">
-                   <h4 class="card-title" style="text-align:center;">Climate</h4>
-                   <p class="card-text" style="text-align:center;">A healthy ocean regulates climate and reduces climate change impacts. The ocean absorbs 90% of the heat and approx. 30% of CO2 emissions produced  by human activities.</p>
-                 </div>
-               </div>
-             </div>
-
-
-             <div class="col-md-4 mb-5">
-               <div class="card h-100">
-                 <img class="card-img-top" src="{{url_for('static',filename='img/protein.jpg')}}" height="250" width="300" alt="">
-                 <div class="card-body">
-                   <h4 class="card-title" style="text-align:center;">Animal Protein</h4>
-                   <p class="card-text" style="text-align:center;">The ocean provides atleast one fifth of the animal protein people eat. It accounts for 20% of global animal protein consumption and over 50% in many developing nations.</p>
-                 </div>
-               </div>
-             </div>
-
-
-             <div class="col-md-4 mb-5">
-               <div class="card h-100">
-                 <img class="card-img-top" src="{{url_for('static',filename='img/medical.jpg')}}" height="250" width="300" alt="">
-                 <div class="card-body">
-                   <h4 class="card-title" style="text-align:center;">Medical Use</h4>
-                   <p class="card-text" style="text-align:center;">Over 10,000 components have been extracted from marine environments which have been used in research, medications, and testing.</p>
-                 </div>
-               </div>
-             </div>
-           </div>
-
-           <div class='row'>
-
-           <div class="col-md-4 mb-5">
-               <div class="card h-100">
-                 <img class="card-img-top" src="{{url_for('static',filename='img/transport.jpg')}}" height="250" width="300" alt="">
-                 <div class="card-body">
-                   <h4 class="card-title" style="text-align:center;">Transport</h4>
-                   <p class="card-text" style="text-align:center;">The ocean creates an important form of transportation. About 90% of global trade is carried by sea. It is an important source of transport and tourism.</p>
-                 </div>
-               </div>
-             </div>
-
-           <div class="col-md-4 mb-5">
-               <div class="card h-100">
-                 <img class="card-img-top" src="{{url_for('static',filename='img/beuty.jpg')}}" height="250" width="300" alt="">
-                 <div class="card-body">
-                   <h4 class="card-title" style="text-align:center;">Beauty and Diversity</h4>
-                   <p class="card-text" style="text-align:center;">The ocean provides increadible source of beauty, inspiration and recreation including diving, boating and many others. It supports an icredible diversity of life which is estimated to be over two million.</p>
-                 </div>
-               </div>
-             </div>
-
-           <div class="col-md-4 mb-5">
-               <div class="card h-100">
-                 <img class="card-img-top" src="{{url_for('static',filename='img/Oxygen.jpg')}}" height="250" width="300" alt="">
-                 <div class="card-body">
-                   <h4 class="card-title" style="text-align:center;">Oxygen</h4>
-                   <p class="card-text" style="text-align:center;">The ocean generates over half of the oxygen we breathe. Phytoplankton, tiny marine plants that live on the ocean’s surface, photosynthesize and produce an estimated 50-80% of Earth’s oxygen.</p>
-                 </div>
-               </div>
-             </div>
-
-           </div>
-
-           <!-- /.row -->
-
-         </div>
-         <!-- /.container -->
-
-
-
-       <!-- Footer -->
-  <footer>
-    <div class="container">
-      <div class="row">
-        <div class="col-lg-8 col-md-10 mx-auto">
-          <ul class="list-inline text-center">
-            <li class="list-inline-item">
-              <a href="https://github.com/parineeta16/Identification-of-Plastic-Waste-Hotspots-in-and-around-Ocean-Water-using-Machine-Learning" target = "_blank">
-                <span class="fa-stack fa-lg">
-                  <i class="fas fa-circle fa-stack-2x"></i>
-                  <i class="fab fa-github fa-stack-1x fa-inverse"></i>
-                </span>
-              </a>
-            </li>
-          </ul>
-          <p class="copyright text-muted">Copyright &copy; Your Website 2020</p>
+{% block content %}
+<!-- Editorial Hero Section -->
+<header class="hero-editorial" style="background-image: url('{{ url_for('static', filename='img/Home.jpg') }}');">
+  <div class="hero-overlay"></div>
+  <div class="container hero-content">
+    <div class="row">
+      <div class="col-lg-9 col-xl-8">
+        <span class="badge-research">Marine Science & Computational Research</span>
+        <h1 class="display-4 font-serif">AI-GIS Detection and Prioritisation of Plastic Waste Hotspots</h1>
+        <p class="lead">
+          An integrated computational framework coupling deep convolutional neural networks for marine debris classification, spatial GIS modeling for oceanic gyre prioritization, and formal automata verification for observation data lifecycles.
+        </p>
+        <div class="d-flex flex-wrap align-items-center mt-4">
+          <a href="/object" class="btn-research-primary mr-3 mb-2">
+            <i class="fas fa-camera mr-2"></i> Image Detection
+          </a>
+          <a href="/hotspot" class="btn-research-outline-light mr-3 mb-2">
+            <i class="fas fa-map-marked-alt mr-2"></i> GIS Hotspot Prioritisation
+          </a>
+          <a href="/automata" class="btn-research-outline-light mb-2">
+            <i class="fas fa-project-diagram mr-2"></i> FLA Automata
+          </a>
         </div>
       </div>
     </div>
-  </footer>
+  </div>
+</header>
 
+<!-- Verified Dataset Metrics Section -->
+<section class="py-4">
+  <div class="container">
+    <div class="row justify-content-center mb-3">
+      <div class="col-lg-10 text-center">
+        <h6 class="text-uppercase text-muted letter-spacing-1 font-weight-bold small">Baseline Oceanographic Survey Records</h6>
+        <p class="small text-muted mb-0">
+          Historical observation metrics derived from the peer-reviewed dataset by Laurent Lebreton et al. (<em>Nature Scientific Reports</em>, 2018).
+          <span class="d-block font-italic">Note: Field measurements reflect standardized historical survey expeditions and do not represent continuous live sensor feeds.</span>
+        </p>
+      </div>
+    </div>
 
-  <!-- Bootstrap core JavaScript -->
-  <script src="{{  url_for('static', filename='vendor/jquery/jquery.min.js')}}"></script>
-  <script src="{{  url_for('static', filename='vendor/bootstrap/js/bootstrap.bundle.min.js')}}"></script>
+    <div class="row">
+      <div class="col-lg-3 col-6 mb-3">
+        <div class="stat-kpi-card">
+          <div class="stat-label">Total Survey Points</div>
+          <div class="stat-value">3,532</div>
+          <small class="text-muted">Standardised manta & mega net trawls</small>
+        </div>
+      </div>
+      <div class="col-lg-3 col-6 mb-3">
+        <div class="stat-kpi-card stat-warning">
+          <div class="stat-label">Inside GPGP Boundary</div>
+          <div class="stat-value text-warning">509</div>
+          <small class="text-muted">North Pacific subtropical gyre core</small>
+        </div>
+      </div>
+      <div class="col-lg-3 col-6 mb-3">
+        <div class="stat-kpi-card stat-critical">
+          <div class="stat-label">Critical Hotspots</div>
+          <div class="stat-value text-danger">467</div>
+          <small class="text-muted">High prioritization tier (HPI &ge; 70)</small>
+        </div>
+      </div>
+      <div class="col-lg-3 col-6 mb-3">
+        <div class="stat-kpi-card stat-teal">
+          <div class="stat-label">Peak Concentration</div>
+          <div class="stat-value text-info" style="font-size: 1.45rem;">43,478.8</div>
+          <small class="text-muted">Grams per square kilometer (g/km²)</small>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
-  <!-- Custom scripts for this template -->
-  <script src="{{  url_for('static', filename='js/clean-blog.min.js')}}"></script>
+<!-- Core Architecture / Three Pillars Section -->
+<section class="py-5 bg-white border-top border-bottom">
+  <div class="container">
+    <div class="row justify-content-center mb-5 text-center">
+      <div class="col-lg-8">
+        <span class="badge-research">System Architecture</span>
+        <h2 class="font-serif">Three Core Technical Pillars</h2>
+        <p class="text-muted">
+          The Stop Marine Pollution system integrates machine learning, geographic spatial analysis, and theoretical computer science to provide actionable intelligence on oceanic plastic waste.
+        </p>
+      </div>
+    </div>
 
-</body>
+    <div class="row">
+      <!-- Pillar 1: Image Detection -->
+      <div class="col-lg-4 mb-4">
+        <div class="research-card h-100">
+          <div class="research-card-header d-flex align-items-center">
+            <i class="fas fa-brain text-primary mr-2"></i>
+            <span>1. AI Image Classification</span>
+          </div>
+          <div class="research-card-body d-flex flex-column">
+            <h5 class="font-serif mb-2">Deep Learning Debris Analysis</h5>
+            <p class="small text-muted flex-grow-1">
+              Implements convolutional neural network inference using the Inception-v3 topology. The model evaluates marine debris images normalized to 299&times;299 RGB inputs across six distinct material categories: plastics, glass, metals, cardboard, paper, and general trash.
+            </p>
+            <div class="border-top pt-3 mt-2">
+              <a href="/object" class="btn btn-sm btn-outline-primary btn-block">Explore Image Detection &rarr;</a>
+            </div>
+          </div>
+        </div>
+      </div>
 
-</html>
+      <!-- Pillar 2: GIS Prioritisation -->
+      <div class="col-lg-4 mb-4">
+        <div class="research-card h-100">
+          <div class="research-card-header d-flex align-items-center">
+            <i class="fas fa-map-marked-alt text-success mr-2"></i>
+            <span>2. GIS Hotspot Prioritisation</span>
+          </div>
+          <div class="research-card-body d-flex flex-column">
+            <h5 class="font-serif mb-2">Hotspot Prioritization Index (HPI)</h5>
+            <p class="small text-muted flex-grow-1">
+              Evaluates oceanic accumulation zones using geostatistical modeling across 3,532 survey coordinates. The composite index weights standardized mass concentration (50%), subtropical gyre containment (35%), and temporal recency (15%) to rank intervention priority.
+            </p>
+            <div class="border-top pt-3 mt-2">
+              <a href="/hotspot" class="btn btn-sm btn-outline-success btn-block">Explore GIS Hotspots &rarr;</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pillar 3: FLA Automata -->
+      <div class="col-lg-4 mb-4">
+        <div class="research-card h-100">
+          <div class="research-card-header d-flex align-items-center">
+            <i class="fas fa-project-diagram text-info mr-2"></i>
+            <span>3. FLA Lifecycle Automata</span>
+          </div>
+          <div class="research-card-body d-flex flex-column">
+            <h5 class="font-serif mb-2">Formal State Verification</h5>
+            <p class="small text-muted flex-grow-1">
+              Formally modeled as a Deterministic Finite Automaton (DFA) $M = (Q, \Sigma, \delta, q_0, F)$. Guarantees strict mathematical invariants across eight formal lifecycle states from draft field capture through geospatial tagging, operator review, and archive verification.
+            </p>
+            <div class="border-top pt-3 mt-2">
+              <a href="/automata" class="btn btn-sm btn-outline-info btn-block">Explore FLA Automata &rarr;</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Marine Ecological Importance Section -->
+<section class="py-5">
+  <div class="container">
+    <div class="row align-items-center mb-5">
+      <div class="col-lg-6 mb-4 mb-lg-0">
+        <span class="badge-research">Environmental Context</span>
+        <h2 class="font-serif">Why Ocean Protection Matters</h2>
+        <p class="text-muted">
+          Marine ecosystems produce over half of Earth's atmospheric oxygen, absorb nearly a third of anthropogenic carbon dioxide emissions, and support essential food webs worldwide. An estimated 8 million metric tons of plastics enter waterways annually, fragmenting into durable microplastics that threaten marine biology.
+        </p>
+        <p class="small text-muted">
+          By combining algorithmic debris recognition with quantitative hotspot prioritization, researchers and mitigation programs can target cleanup operations where plastic mass density causes the greatest ecological impact.
+        </p>
+        <a href="/about" class="btn-research-secondary mt-2">
+          Read Research Background &rarr;
+        </a>
+      </div>
+      <div class="col-lg-6">
+        <div class="card border-0 shadow-sm overflow-hidden">
+          <img src="{{ url_for('static', filename='img/ocean.jpg') }}" alt="Ocean Surface Water" class="img-fluid" style="border-radius: var(--radius-md); object-fit: cover; max-height: 340px; width: 100%;">
+        </div>
+      </div>
+    </div>
+
+    <!-- Editorial Cards: Ecosystem Services -->
+    <div class="row">
+      <div class="col-md-4 mb-4">
+        <div class="research-card h-100">
+          <img class="card-img-top" src="{{ url_for('static', filename='img/Oxygen.jpg') }}" alt="Ocean Phytoplankton Oxygen Production" style="height: 180px; object-fit: cover;">
+          <div class="research-card-body">
+            <h5 class="font-serif mb-2">Atmospheric Oxygen</h5>
+            <p class="small text-muted mb-0">
+              Phytoplankton and oceanic photosynthesis generate an estimated 50&ndash;80% of Earth's oxygen supply, sustaining planetary respiratory cycles.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4 mb-4">
+        <div class="research-card h-100">
+          <img class="card-img-top" src="{{ url_for('static', filename='img/healthy.jpg') }}" alt="Climate Regulation" style="height: 180px; object-fit: cover;">
+          <div class="research-card-body">
+            <h5 class="font-serif mb-2">Climate Regulation</h5>
+            <p class="small text-muted mb-0">
+              The world ocean absorbs over 90% of excess heat trapped by greenhouse gases and approximately 30% of anthropogenic carbon dioxide emissions.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4 mb-4">
+        <div class="research-card h-100">
+          <img class="card-img-top" src="{{ url_for('static', filename='img/protein.jpg') }}" alt="Global Food Security" style="height: 180px; object-fit: cover;">
+          <div class="research-card-body">
+            <h5 class="font-serif mb-2">Marine Biodiversity</h5>
+            <p class="small text-muted mb-0">
+              Over two million marine species inhabit ocean ecosystems, providing critical food security and vital biochemical compounds for modern medicine.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Attribution & Methodology Callout -->
+<section class="py-5 bg-white border-top">
+  <div class="container">
+    <div class="row justify-content-center text-center">
+      <div class="col-lg-8">
+        <h4 class="font-serif mb-3">Open Scientific Methodology & Data Attribution</h4>
+        <p class="small text-muted mb-4">
+          Spatial GIS coordinates and mass concentration figures used in this project are derived from Laurent Lebreton et al., <em>"Evidence that the Great Pacific Garbage Patch is rapidly accumulating plastic"</em>, Nature Scientific Reports (2018).
+        </p>
+        <div class="d-flex justify-content-center flex-wrap">
+          <a href="/visualizations" class="btn btn-sm btn-outline-secondary mr-2 mb-2">
+            <i class="fas fa-chart-area mr-1"></i> Tableau Explorations
+          </a>
+          <a href="/contact" class="btn btn-sm btn-outline-secondary mb-2">
+            <i class="fas fa-envelope mr-1"></i> Research Inquiries
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

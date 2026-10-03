@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+
+{% block title %}About the Research Initiative{% endblock %}
+
+{% block content %}
+<!-- Page Header Banner -->
+<header class="hero-editorial" style="background-image: url('{{ url_for('static', filename='img/about-bg.jpg') }}'); padding: 4rem 0 3rem;">
+  <div class="hero-overlay"></div>
+  <div class="container hero-content">
+    <div class="row">
+      <div class="col-lg-9">
+        <span class="badge-research">Academic Research & Methodology</span>
+        <h1 class="font-serif">About Stop Marine Pollution</h1>
+        <p class="lead mb-0">
+          A computational research project exploring artificial intelligence, spatial GIS modeling, and formal automata theory to detect, prioritize, and manage oceanic plastic waste accumulation.
+        </p>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- Mission & Problem Statement Section -->
+<section class="py-5">
+  <div class="container">
+    <div class="row align-items-center mb-5">
+      <div class="col-lg-6 mb-4 mb-lg-0">
+        <span class="badge-research">Problem Statement</span>
+        <h2 class="font-serif">The Oceanic Plastic Crisis</h2>
+        <p class="text-muted">
+          Over 5.25 trillion plastic particles currently float on the ocean surface, with approximately 8 million metric tons entering marine environments each year. In oceanic gyres, plastic debris breaks down under ultraviolet radiation into toxic microplastics that enter the global food web.
+        </p>
+        <p class="text-muted">
+          Traditional cleanup operations face major operational constraints: searching vast open ocean expanses without targeted intelligence is economically and energetically prohibitive.
+        </p>
+        <p class="text-muted">
+          Our initiative addresses this challenge by coupling automated debris classification with quantitative geographic hotspot prioritization, enabling intervention teams to focus resources on the highest mass-density zones.
+        </p>
+      </div>
+      <div class="col-lg-6">
+        <div class="research-card">
+          <img src="{{ url_for('static', filename='img/home2.jpg') }}" alt="Ocean Environmental Survey" class="img-fluid" style="border-radius: var(--radius-md) var(--radius-md) 0 0; object-fit: cover; max-height: 260px; width: 100%;">
+          <div class="research-card-body p-3 small text-muted">
+            <em>Surface plastic fragments in oceanic convergence zones resist biodegradation and accumulate persistent organic pollutants (POPs).</em>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Research Methodology Breakdown -->
+    <div class="row mb-5">
+      <div class="col-12 text-center mb-4">
+        <span class="badge-research">Methodology</span>
+        <h3 class="font-serif">Integrated Technical Framework</h3>
+      </div>
+
+      <div class="col-md-4 mb-4">
+        <div class="research-card h-100">
+          <div class="research-card-header">
+            <h6 class="mb-0 font-serif"><i class="fas fa-eye text-primary mr-2"></i> Computer Vision Pipeline</h6>
+          </div>
+          <div class="research-card-body small text-muted">
+            <p>
+              Preprocesses RGB imagery to $299 \times 299$ resolution and feeds normalized tensors into an Inception-v3 deep convolutional network trained across six maritime debris categories.
+            </p>
+            <ul class="pl-3 mb-0">
+              <li>Input shape: <code>(1, 299, 299, 3)</code></li>
+              <li>Preprocessing: Normalized to <code>[-1.0, 1.0]</code></li>
+              <li>Output: Categorical label prediction</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4 mb-4">
+        <div class="research-card h-100">
+          <div class="research-card-header">
+            <h6 class="mb-0 font-serif"><i class="fas fa-map-marked text-success mr-2"></i> Spatial GIS Prioritisation</h6>
+          </div>
+          <div class="research-card-body small text-muted">
+            <p>
+              Applies a multi-criteria Hotspot Prioritization Index (HPI) to 3,532 standardized field observations from Laurent Lebreton et al. (2018), ranking points into Critical, Moderate, and Baseline tiers.
+            </p>
+            <ul class="pl-3 mb-0">
+              <li>Weighting: Mass (50%), Gyre (35%), Year (15%)</li>
+              <li>Coordinate System: WGS 84 (EPSG:4326)</li>
+              <li>Clustering: Multi-point geospatial bounds</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4 mb-4">
+        <div class="research-card h-100">
+          <div class="research-card-header">
+            <h6 class="mb-0 font-serif"><i class="fas fa-sitemap text-info mr-2"></i> Formal Automata Modeling</h6>
+          </div>
+          <div class="research-card-body small text-muted">
+            <p>
+              Formalizes the lifecycle of an environmental debris observation through an 8-state Deterministic Finite Automaton (DFA) $M = (Q, \Sigma, \delta, q_0, F)$ enforcing mathematical transition invariants.
+            </p>
+            <ul class="pl-3 mb-0">
+              <li>States: $Q = 8$, Alphabet: $\Sigma = 7$</li>
+              <li>Initial: $q_0 = \text{DRAFT}$</li>
+              <li>Accepting: $F = \{\text{ARCHIVED, REJECTED}\}$</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Research Team Section -->
+    <div id="team" class="border-top pt-5">
+      <div class="text-center mb-5">
+        <span class="badge-research">Contributors</span>
+        <h3 class="font-serif">Project Team & Academic Contributors</h3>
+        <p class="text-muted small">
+          Developed as an academic software engineering and machine learning research project.
+        </p>
+      </div>
+
+      <div class="row justify-content-center">
+        <!-- Dr. Jerry Gao -->
+        <div class="col-lg-3 col-md-6 mb-4">
+          <div class="research-card text-center h-100">
+            <div class="p-3">
+              <img src="{{ url_for('static', filename='img/Jerry_Gao.jpg') }}" alt="Dr. Jerry Gao" class="img-fluid rounded-circle mb-3 shadow-sm" style="width: 120px; height: 120px; object-fit: cover; border: 3px solid var(--border-subtle);">
+              <h5 class="font-serif mb-1">Dr. Jerry Gao</h5>
+              <div class="small text-primary font-weight-bold mb-2">Faculty Advisor & Professor</div>
+              <p class="small text-muted mb-0">
+                Project guidance and academic oversight in machine learning architecture and software engineering.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Parineeta Patil -->
+        <div class="col-lg-3 col-md-6 mb-4">
+          <div class="research-card text-center h-100">
+            <div class="p-3">
+              <img src="{{ url_for('static', filename='img/Patil_Parineeta.jpg') }}" alt="Parineeta Patil" class="img-fluid rounded-circle mb-3 shadow-sm" style="width: 120px; height: 120px; object-fit: cover; border: 3px solid var(--border-subtle);">
+              <h5 class="font-serif mb-1">Parineeta Patil</h5>
+              <div class="small text-primary font-weight-bold mb-2">Graduate Researcher</div>
+              <p class="small text-muted mb-0">
+                Machine learning model training, TensorFlow pipeline development, and data integration.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Girish Chhabra -->
+        <div class="col-lg-3 col-md-6 mb-4">
+          <div class="research-card text-center h-100">
+            <div class="p-3">
+              <img src="{{ url_for('static', filename='img/Chhabra_Girish.jpg') }}" alt="Girish Chhabra" class="img-fluid rounded-circle mb-3 shadow-sm" style="width: 120px; height: 120px; object-fit: cover; border: 3px solid var(--border-subtle);">
+              <h5 class="font-serif mb-1">Girish Chhabra</h5>
+              <div class="small text-primary font-weight-bold mb-2">Graduate Researcher</div>
+              <p class="small text-muted mb-0">
+                Tableau dashboard visualisations, data exploration, and analytics pipeline.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Steffin Franklin -->
+        <div class="col-lg-3 col-md-6 mb-4">
+          <div class="research-card text-center h-100">
+            <div class="p-3">
+              <img src="{{ url_for('static', filename='img/Franklin_Steffin.png') }}" alt="Steffin Franklin" class="img-fluid rounded-circle mb-3 shadow-sm" style="width: 120px; height: 120px; object-fit: cover; border: 3px solid var(--border-subtle);">
+              <h5 class="font-serif mb-1">Steffin Franklin</h5>
+              <div class="small text-primary font-weight-bold mb-2">Graduate Researcher</div>
+              <p class="small text-muted mb-0">
+                GIS data extraction, geospatial mapping, and application integration.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+{% endblock %}

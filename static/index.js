@@ -57,7 +57,7 @@ function submitImage() {
 
   // call the predict function of the backend
   predictImage(imageDisplay.src);
-print("im back")
+  console.log("im back");
 }
 
 function clearImage() {
@@ -103,7 +103,6 @@ function previewFile(file) {
 //========================================================================
 
 function predictImage(image) {
-console.log("in pred")
   fetch("/predict", {
     method: "POST",
     headers: {
@@ -112,14 +111,17 @@ console.log("in pred")
     body: JSON.stringify(image)
   })
     .then(resp => {
-      if (resp.ok)
-        resp.json().then(data => {
-          displayResult(data);
-        });
+      resp.json().then(data => {
+        displayResult(data);
+      }).catch(() => {
+        hide(loader);
+        document.getElementById("timepass").innerText = "Error: Invalid response from server";
+      });
     })
     .catch(err => {
       console.log("An error occured", err.message);
-      window.alert("Oops! Something went wrong.");
+      hide(loader);
+      window.alert("Oops! Network error connecting to prediction endpoint.");
     });
 }
 
@@ -131,15 +133,17 @@ function displayImage(image, id) {
 }
 
 function displayResult(data) {
-console.log("in display")
-  // display the result
-  // imageDisplay.classList.remove("loading");
   hide(loader);
-console.log(document.getElementById("timepass").innerHTML)
-document.getElementById("timepass").innerHTML= data.result;
-  // predResult.innerHTML = data.result;
-
-  // show(predResult);
+  const timepassEl = document.getElementById("timepass");
+  if (data.status === "success") {
+    timepassEl.innerHTML = `<span style="color: #28a745;">${data.result}</span>`;
+  } else if (data.status === "unavailable") {
+    timepassEl.innerHTML = `<span style="color: #ffc107;">${data.result}</span><br><small style="font-size: 0.9rem; color: #fff;">${data.error}</small><br><span style="font-size: 0.75rem; color: #ccc;">${data.detail || ''}</span>`;
+  } else if (data.error) {
+    timepassEl.innerHTML = `<span style="color: #dc3545;">${data.error}</span>`;
+  } else {
+    timepassEl.innerText = data.result || "No result";
+  }
 }
 
 function hide(el) {

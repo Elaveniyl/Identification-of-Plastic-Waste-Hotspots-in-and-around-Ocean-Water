@@ -1,186 +1,319 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %}
 
-<head>
+{% block title %}GIS Hotspot Prioritisation{% endblock %}
 
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta name="description" content="">
-  <meta name="author" content="">
-
-  <title>Stop Marine Pollution</title>
-
-  <!-- Bootstrap core CSS -->
-  <link href= "{{  url_for('static', filename='vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
-        <link rel="stylesheet" href={{  url_for('static', filename='style1.css') }}">
-
-  <!-- Custom fonts for this template -->
-  <link href="{{  url_for('static', filename='vendor/fontawesome-free/css/all.min.css')}}" rel="stylesheet" type="text/css">
-  <link href="{{  url_for('static', filename= 'https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic')}}" rel='stylesheet' type='text/css'>
-  <link href="{{  url_for('static', filename='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800')}}" rel='stylesheet' type='text/css'>
-
-  <!-- Custom styles for this template -->
-  <link href="{{  url_for('static', filename='css/clean-blog.min.css')}}" rel="stylesheet">
+{% block extra_head %}
+<!-- Leaflet Map CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 <style>
-.admin-sidenav {
-    width: auto;
-    height: auto;
-    margin-left: 0px;
-}
-.btn {
-  background-color: tomato;
-  border: none;
-  color: white;
-  padding: 16px 32px;
-  text-align: center;
-  font-size: 16px;
-  margin: 4px 2px;
-  opacity: 1;
-  transition: 0.3s;
-}
-
-.admin-sidenav a {
-    text-decoration: none;
-}
-.admin-sidenav li {
-    text-align: justify;
-    padding: .5rem;
-    padding-left: 1rem;
-    -webkit-transition: all .2s linear;
-    transition: all .2s linear;
-    background-color: #000;
-    border: 1px solid #333;
-}
-.admin-sidenav li a {
-    color: #fff;
-}
-
-.admin-sidenav li a:active {
-    border-color: #02d3f5;
-}
-
-.admin-sidenav li:hover {
-    border-radius: 0 .5rem .5rem 0;
-    border-color: #02d3f5;
-    -webkit-transform: translate(30px, 0px);
-    transform: translate(30px, 0px);
-    background: -webkit-linear-gradient(left, #006a7b, #002340);
-    background: linear-gradient(to right, #006a7b, #002340);
-}
-
-.admin-sidenav li:active {
-    border-color: #02d3f5;
-}
+  #gisMap {
+    height: 560px;
+    width: 100%;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-subtle);
+    box-shadow: var(--shadow-sm);
+    z-index: 1;
+  }
+  .leaflet-popup-content {
+    font-size: 0.88rem;
+    line-height: 1.5;
+  }
 </style>
-</head>
+{% endblock %}
 
-<body onload="graph1()" >
-
-  <!-- Navigation -->
-  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
-    <div class="col-sm-4 col-xs-8">
-
-                     <a class="navbar-brand" href="/">
-                  <img class="w-24 h-24 rounded-full shadow-md" src="{{ url_for('static',filename='asd.jpg') }}" style="width:160px;height:150px;background: transparent;border-radius:9999px;"/></a>
-              
-          
-      </div>
-    <div class="container">
-      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
-        Menu
-        <i class="fas fa-bars"></i>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarResponsive">
-        <ul class="navbar-nav ml-auto">
-          <li class="nav-item">
-            <a class="nav-link" href="/">Home</a>
-          </li>
-
-
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" data-toggle="dropdown"  role="button" aria-haspopup="true" aria-expanded="false">About</a>
-    		<div class="dropdown-menu">
-      			<a class="dropdown-item" href="/mission">Mission</a>
-      			<a class="dropdown-item" href="/team">Our Team</a>
-      			<div class="dropdown-divider"></div>
-    		</div>
-          </li>
-
-
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Projects</a>
-    		<div class="dropdown-menu">
-      			<a class="dropdown-item" href="/object">Plastic Object Detection</a>
-      			<a class="dropdown-item" href="/hotspot">Plastic Hotspot Detection</a>
-      			<div class="dropdown-divider"></div>
-    		</div>
-          </li>
-
-
-          <li class="nav-item">
-            <a class="nav-link" href="/contact">Contact</a>
-          </li>
-        </ul>
+{% block content %}
+<!-- Editorial Header Banner -->
+<header class="hero-editorial" style="background-image: url('{{ url_for('static', filename='img/hotspot.jpg') }}'); padding: 4rem 0 3rem;">
+  <div class="hero-overlay"></div>
+  <div class="container hero-content">
+    <div class="row">
+      <div class="col-lg-9">
+        <span class="badge-research">Spatial Geostatistics & Oceanography</span>
+        <h1 class="font-serif">Geographic Plastic Waste Hotspot Prioritisation</h1>
+        <p class="lead mb-0">
+          Geospatial mapping and multi-criteria prioritization across 3,532 calibrated field observations. Computes the composite Hotspot Prioritization Index (HPI) to rank ocean surface accumulation zones and subtropical gyres for targeted cleanup intervention.
+        </p>
       </div>
     </div>
-  </nav>
+  </div>
+</header>
 
-  <!-- Page Header -->
-  <header class="masthead" style="background-image: url('{{url_for('static',filename='img/hotspot.jpg')}}')">
-    <div class="overlay"></div>
-    <div class="container">
-      <div class="row">
-        <div class="col-lg-8 col-md-10 mx-auto">
-          <div class="site-heading">
-            <h2>Plastic Hotspot Detection</h2>
+<!-- Main GIS Dashboard Section -->
+<section class="py-4">
+  <div class="container-fluid px-lg-4">
+    
+    <!-- KPI Summary Row -->
+    <div class="row mb-4">
+      <div class="col-xl-3 col-md-6 mb-3">
+        <div class="stat-kpi-card">
+          <div class="stat-label">Total Observations</div>
+          <div class="stat-value" id="statTotal">3,532</div>
+          <small class="text-muted">Standardized manta & mega net surveys</small>
+        </div>
+      </div>
+      <div class="col-xl-3 col-md-6 mb-3">
+        <div class="stat-kpi-card stat-warning">
+          <div class="stat-label">Inside GPGP Boundary</div>
+          <div class="stat-value text-warning" id="statGpgp">509</div>
+          <small class="text-muted">High-density accumulation core</small>
+        </div>
+      </div>
+      <div class="col-xl-3 col-md-6 mb-3">
+        <div class="stat-kpi-card stat-critical">
+          <div class="stat-label">Critical Hotspots</div>
+          <div class="stat-value text-danger" id="statCritical">467</div>
+          <small class="text-muted">Highest intervention tier (HPI &ge; 70)</small>
+        </div>
+      </div>
+      <div class="col-xl-3 col-md-6 mb-3">
+        <div class="stat-kpi-card stat-teal">
+          <div class="stat-label">Peak Concentration</div>
+          <div class="stat-value text-info" id="statMax" style="font-size: 1.55rem;">43,478.8 g/km²</div>
+          <small class="text-muted">Extreme plastic mass loading recorded</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filter Controls & Legend Bar -->
+    <div class="research-card mb-4">
+      <div class="research-card-body py-3">
+        <div class="row align-items-center">
+          <div class="col-lg-7 d-flex flex-wrap align-items-center mb-3 mb-lg-0">
+            <div class="mr-3 mb-2">
+              <label for="tierFilter" class="small font-weight-bold text-muted d-block mb-1">Priority Tier</label>
+              <select id="tierFilter" class="form-control form-control-sm" onchange="loadHotspots()">
+                <option value="">All Priority Tiers (3,532)</option>
+                <option value="Critical">Critical Only (HPI &ge; 70)</option>
+                <option value="Moderate">Moderate Only (30 &le; HPI &lt; 70)</option>
+                <option value="Baseline">Baseline Only (HPI &lt; 30)</option>
+              </select>
+            </div>
+
+            <div class="mr-3 mb-2">
+              <label for="gpgpFilter" class="small font-weight-bold text-muted d-block mb-1">Subtropical Gyre Zone</label>
+              <select id="gpgpFilter" class="form-control form-control-sm" onchange="loadHotspots()">
+                <option value="">All Oceanic Zones</option>
+                <option value="1">Inside GPGP Core Only</option>
+                <option value="0">Outside GPGP Boundary</option>
+              </select>
+            </div>
+
+            <div class="mb-2">
+              <label for="limitFilter" class="small font-weight-bold text-muted d-block mb-1">Display Limit</label>
+              <select id="limitFilter" class="form-control form-control-sm" onchange="loadHotspots()">
+                <option value="250">Top 250 Points</option>
+                <option value="500">Top 500 Points</option>
+                <option value="1000">Top 1,000 Points</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Priority Legend -->
+          <div class="col-lg-5 text-lg-right">
+            <span class="small font-weight-bold text-muted d-block mb-1">Prioritisation Tiers (HPI)</span>
+            <div class="d-inline-flex flex-wrap align-items-center">
+              <span class="badge badge-tier-critical mr-2 py-1 px-2">
+                <span class="tier-dot critical"></span> Critical (&ge; 70)
+              </span>
+              <span class="badge badge-tier-moderate mr-2 py-1 px-2">
+                <span class="tier-dot moderate"></span> Moderate (30–69)
+              </span>
+              <span class="badge badge-tier-baseline py-1 px-2">
+                <span class="tier-dot baseline"></span> Baseline (&lt; 30)
+              </span>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </header>
 
-<div style="display: flex;
-justify-content: center;
-align-items: center;">
-<ul style="list-style-type: none;">
-<li style="display: inline;"><button class="btn"><a href="#" onclick="graph1()" >Ocean Garbage Patch</a></button></li>
-<li style="display: inline;"><button class="btn"><a href="#" onclick="graph2()" >Global Plastic Data</a></button></li>
-<li style="display: inline;"><button class="btn"><a href="#" onclick="graph3()" >Pacific Garbage Patch</a></button></li>
-</ul>
-        </div>
-            <div class="container-fluid" id="graph1" style="padding-right: 20px; padding left: 20px;">
-        <div class='tableauPlaceholder' id='viz1606716779207' style='position: relative'><noscript><a href='#'><img alt=' ' src='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;Oc&#47;OceanGarbagePatch&#47;Pacificdrift&#47;1_rss.png' style='border: none' /></a></noscript><object class='tableauViz'  style='display:none;'><param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' /> <param name='embed_code_version' value='3' /> <param name='site_root' value='' /><param name='name' value='OceanGarbagePatch&#47;Pacificdrift' /><param name='tabs' value='no' /><param name='toolbar' value='yes' /><param name='static_image' value='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;Oc&#47;OceanGarbagePatch&#47;Pacificdrift&#47;1.png' /> <param name='animate_transition' value='yes' /><param name='display_static_image' value='yes' /><param name='display_spinner' value='yes' /><param name='display_overlay' value='yes' /><param name='display_count' value='yes' /><param name='language' value='en' /><param name='filter' value='publish=yes' /></object></div>                <script type='text/javascript'>                    var divElement = document.getElementById('viz1606716779207');                    var vizElement = divElement.getElementsByTagName('object')[0];                    vizElement.style.width='100%';vizElement.style.height=(divElement.offsetWidth*0.75)+'px';                    var scriptElement = document.createElement('script');                    scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';                    vizElement.parentNode.insertBefore(scriptElement, vizElement);                </script>
-</div>
-
-      <div class="container-fluid" id="graph2"style="padding-right: 20px; padding left: 20px;">
-       <div class='tableauPlaceholder' id='viz1606717628657' style='position: relative'><noscript><a href='#'><img alt=' ' src='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;Gl&#47;GlobalPlasticData&#47;Globaldata&#47;1_rss.png' style='border: none' /></a></noscript><object class='tableauViz'  style='display:none;'><param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' /> <param name='embed_code_version' value='3' /> <param name='site_root' value='' /><param name='name' value='GlobalPlasticData&#47;Globaldata' /><param name='tabs' value='no' /><param name='toolbar' value='yes' /><param name='static_image' value='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;Gl&#47;GlobalPlasticData&#47;Globaldata&#47;1.png' /> <param name='animate_transition' value='yes' /><param name='display_static_image' value='yes' /><param name='display_spinner' value='yes' /><param name='display_overlay' value='yes' /><param name='display_count' value='yes' /><param name='language' value='en' /><param name='filter' value='publish=yes' /></object></div>                <script type='text/javascript'>                    var divElement = document.getElementById('viz1606717628657');                    var vizElement = divElement.getElementsByTagName('object')[0];                    vizElement.style.width='100%';vizElement.style.height=(divElement.offsetWidth*0.75)+'px';                    var scriptElement = document.createElement('script');                    scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';                    vizElement.parentNode.insertBefore(scriptElement, vizElement);                </script>
-</div>
-
-      <div class="container-fluid" id="graph3" style="padding-right: 20px; padding left: 20px;">
-        <div class='tableauPlaceholder' id='viz1606718515193' style='position: relative'><noscript><a href='#'><img alt=' ' src='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;Pa&#47;PacificGarbagePatch&#47;HistoryData&#47;1_rss.png' style='border: none' /></a></noscript><object class='tableauViz'  style='display:none;'><param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' /> <param name='embed_code_version' value='3' /> <param name='site_root' value='' /><param name='name' value='PacificGarbagePatch&#47;HistoryData' /><param name='tabs' value='no' /><param name='toolbar' value='yes' /><param name='static_image' value='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;Pa&#47;PacificGarbagePatch&#47;HistoryData&#47;1.png' /> <param name='animate_transition' value='yes' /><param name='display_static_image' value='yes' /><param name='display_spinner' value='yes' /><param name='display_overlay' value='yes' /><param name='display_count' value='yes' /><param name='language' value='en' /></object></div>                <script type='text/javascript'>                    var divElement = document.getElementById('viz1606718515193');                    var vizElement = divElement.getElementsByTagName('object')[0];                    vizElement.style.width='100%';vizElement.style.height=(divElement.offsetWidth*0.75)+'px';                    var scriptElement = document.createElement('script');                    scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';                    vizElement.parentNode.insertBefore(scriptElement, vizElement);                </script>
+    <!-- Interactive Leaflet Map Container -->
+    <div class="research-card mb-4">
+      <div class="research-card-header d-flex justify-content-between align-items-center">
+        <span class="font-serif"><i class="fas fa-globe-americas text-primary mr-2"></i> Spatial Hotspot Distribution Map</span>
+        <span id="activeMarkerCount" class="badge badge-light border">Loading markers...</span>
       </div>
-  <!-- Bootstrap core JavaScript -->
-  <script src="{{  url_for('static', filename='vendor/jquery/jquery.min.js')}}"></script>
-  <script src="{{  url_for('static', filename='vendor/bootstrap/js/bootstrap.bundle.min.js')}}"></script>
+      <div class="research-card-body p-2">
+        <div id="gisMap"></div>
+      </div>
+    </div>
 
-  <!-- Custom scripts for this template -->
-  <script src="{{  url_for('static', filename='js/clean-blog.min.js')}}"></script>
-    <script src={{  url_for('static', filename='js/popper.js')}}"></script>
-    <script src={{  url_for('static', filename='js/bootstrap.min.js')}}"></script>
-    <script src={{  url_for('static', filename='js/main.js')}}"></script>
+    <!-- Observation Data Table -->
+    <div class="research-card mb-4">
+      <div class="research-card-header d-flex justify-content-between align-items-center">
+        <span class="font-serif"><i class="fas fa-table text-secondary mr-2"></i> Standardised Survey Observation Records</span>
+        <small class="text-muted">Ranked by Hotspot Prioritization Index (HPI)</small>
+      </div>
+      <div class="research-card-body p-0">
+        <div class="table-responsive" style="max-height: 380px; overflow-y: auto;">
+          <table class="table table-hover table-striped table-sm mb-0 text-center" id="hotspotsTable">
+            <thead class="thead-light sticky-top">
+              <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Coordinates (Lat, Lon)</th>
+                <th scope="col">Year</th>
+                <th scope="col">Mass Conc. (g/km²)</th>
+                <th scope="col">Inside GPGP?</th>
+                <th scope="col">HPI Score</th>
+                <th scope="col">Priority Tier</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td colspan="7" class="py-4 text-muted"><i class="fas fa-spinner fa-spin mr-2"></i> Loading observations from GIS API...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Methodology & Scientific Formula Callout -->
+    <div class="row">
+      <div class="col-lg-6 mb-4">
+        <div class="research-card h-100">
+          <div class="research-card-header">
+            <h6 class="mb-0 font-serif"><i class="fas fa-calculator text-primary mr-2"></i> Hotspot Prioritization Index Formula</h6>
+          </div>
+          <div class="research-card-body small text-muted">
+            <p class="mb-2">
+              The Hotspot Prioritization Index (HPI) is a standardized multi-criteria score bounded to $[0, 100]$:
+            </p>
+            <div class="p-2 my-2 bg-light rounded text-dark font-weight-bold text-center">
+              $$\text{HPI} = 0.50 \cdot C_{\text{norm}} + 0.35 \cdot I_{\text{GPGP}} + 0.15 \cdot Y_{\text{norm}}$$
+            </div>
+            <ul class="list-unstyled mb-0">
+              <li class="mb-1">&bull; $C_{\text{norm}} \in [0, 100]$: Log-transformed, normalized surface plastic mass concentration.</li>
+              <li class="mb-1">&bull; $I_{\text{GPGP}} \in \{0, 100\}$: Binary indicator for containment within the subtropical gyre boundary ($0.1\text{ g/km}^2$ boundary).</li>
+              <li class="mb-0">&bull; $Y_{\text{norm}} \in [0, 100]$: Normalized temporal recency weighting modern survey expeditions.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-6 mb-4">
+        <div class="research-card h-100">
+          <div class="research-card-header">
+            <h6 class="mb-0 font-serif"><i class="fas fa-book-open text-info mr-2"></i> Dataset Provenance & Scientific Notice</h6>
+          </div>
+          <div class="research-card-body small text-muted">
+            <p class="mb-2">
+              <strong>Data Source:</strong> Laurent Lebreton et al. (2018), <em>"Evidence that the Great Pacific Garbage Patch is rapidly accumulating plastic"</em>, Nature Scientific Reports 8:4666. Dataset aggregated from 655 surface net tows by The Ocean Cleanup Mega Expedition and 2,877 historical trawls (Scripps Institution of Oceanography, Algalita Marine Research, SEAPLEX).
+            </p>
+            <p class="mb-0 font-italic">
+              <strong>Notice:</strong> Observations represent physical marine survey expeditions (1972&ndash;2015). They serve as a calibrated scientific baseline for spatial prioritization models and are not real-time telemetry.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<!-- Leaflet JS (CDN) -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
 <script>
-function graph1() {
-  document.getElementById("graph1").style.display = "block";
-  document.getElementById("graph2").style.display = "none";
-  document.getElementById("graph3").style.display = "none";
+let map = null;
+let markerLayer = null;
 
+function initMap() {
+  // Center map on North Pacific Gyre
+  map = L.map('gisMap').setView([28.0, -145.0], 3);
+  
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 18,
+    attribution: '&copy; OpenStreetMap contributors | Lebreton et al. 2018'
+  }).addTo(map);
+
+  markerLayer = L.layerGroup().addTo(map);
+  loadHotspots();
 }
-function graph2() {
-  document.getElementById("graph1").style.display = "none";
-  document.getElementById("graph2").style.display = "block";
-  document.getElementById("graph3").style.display = "none";}
-function graph3() {
-  document.getElementById("graph1").style.display = "none";
-  document.getElementById("graph2").style.display = "none";
-  document.getElementById("graph3").style.display = "block";}
+
+function loadHotspots() {
+  if (!markerLayer) return;
+  markerLayer.clearLayers();
+
+  const tier = document.getElementById('tierFilter').value;
+  const insideGpgp = document.getElementById('gpgpFilter').value;
+  const limit = document.getElementById('limitFilter').value;
+
+  const params = new URLSearchParams();
+  if (tier) params.set('tier', tier);
+  if (insideGpgp !== '') params.set('inside_gpgp', insideGpgp);
+  if (limit) params.set('limit', limit);
+
+  const url = `/api/hotspots?${params.toString()}`;
+
+  fetch(url)
+    .then(r => r.json())
+    .then(data => {
+      const hotspots = data.hotspots || [];
+      document.getElementById('activeMarkerCount').innerText = `${hotspots.length} Points Rendered`;
+
+      const tbody = document.querySelector('#hotspotsTable tbody');
+      tbody.innerHTML = '';
+
+      if (hotspots.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="py-4 text-muted">No survey points match the selected filter combination.</td></tr>';
+        return;
+      }
+
+      hotspots.forEach(h => {
+        let color = '#0284c7';
+        let badgeClass = 'badge-tier-baseline';
+        if (h.priority_tier && h.priority_tier.includes('Critical')) {
+          color = '#dc2626';
+          badgeClass = 'badge-tier-critical';
+        } else if (h.priority_tier && h.priority_tier.includes('Moderate')) {
+          color = '#d97706';
+          badgeClass = 'badge-tier-moderate';
+        }
+
+        const circle = L.circleMarker([h.latitude, h.longitude], {
+          radius: h.inside_gpgp ? 7 : 5,
+          fillColor: color,
+          color: '#ffffff',
+          weight: 1.5,
+          opacity: 1,
+          fillOpacity: 0.82
+        });
+
+        circle.bindPopup(`
+          <div class="p-1">
+            <h6 class="font-serif mb-1 font-weight-bold">Observation Point #${h.id}</h6>
+            <div class="small mb-1"><strong>Coordinates:</strong> ${h.latitude}&deg;N, ${h.longitude}&deg;E</div>
+            <div class="small mb-1"><strong>Sampling Year:</strong> ${h.year}</div>
+            <div class="small mb-1"><strong>Mass Concentration:</strong> ${Number(h.mass_concentration_g_km2).toLocaleString()} g/km²</div>
+            <div class="small mb-1"><strong>Inside GPGP Core:</strong> ${h.inside_gpgp ? '<span class="text-warning font-weight-bold">Yes</span>' : 'No'}</div>
+            <div class="small mb-1"><strong>Priority Index (HPI):</strong> <span class="badge ${badgeClass}">${h.priority_score}</span></div>
+            <div class="small"><strong>Tier:</strong> ${h.priority_tier}</div>
+          </div>
+        `);
+        markerLayer.addLayer(circle);
+
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td><code>#${h.id}</code></td>
+          <td>${h.latitude}, ${h.longitude}</td>
+          <td>${h.year}</td>
+          <td>${Number(h.mass_concentration_g_km2).toLocaleString()}</td>
+          <td>${h.inside_gpgp ? '<span class="badge badge-warning text-dark">Inside GPGP</span>' : '<span class="text-muted">Outside</span>'}</td>
+          <td><strong>${h.priority_score}</strong></td>
+          <td><span class="badge ${badgeClass} py-1 px-2">${h.priority_tier}</span></td>
+        `;
+        tbody.appendChild(row);
+      });
+    })
+    .catch(err => {
+      console.error('Error loading GIS data:', err);
+      document.querySelector('#hotspotsTable tbody').innerHTML = '<tr><td colspan="7" class="py-4 text-danger">Failed to fetch GIS observation records.</td></tr>';
+    });
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  initMap();
+});
 </script>
+{% endblock %}
