@@ -10,6 +10,37 @@ from PIL import Image
 import numpy as np
 
 
+# ============================================================================
+# Formal Language Definition: RFC 2397 Data URL Header Language
+# ============================================================================
+# Regular Expression:
+#     ^data:image/[a-zA-Z0-9\+\.\-]+;base64,
+#
+# Language Definition L(R_data_url):
+#     Defines the prefix language over ASCII alphabet Σ_ascii matching valid MIME-type
+#     image encapsulation headers encoded in Base64:
+#         L = { 'data:image/' · t · ';base64,' | t ∈ (Alphabet_alphanumeric ∪ {'+', '.', '-'})+ }
+#
+# FLA Verification Test Cases:
+#   Accepted Test Strings (in L):
+#     1. "data:image/png;base64,"
+#     2. "data:image/jpeg;base64,"
+#     3. "data:image/svg+xml;base64,"
+#     4. "data:image/webp;base64,"
+#     5. "data:image/vnd.microsoft.icon;base64,"
+#
+#   Rejected Test Strings (not in L):
+#     1. "data:text/plain;base64,"          (top-level type is 'text', not 'image')
+#     2. "data:image/png;charset=utf-8,"     (missing required ';base64,' transfer encoding)
+#     3. "http://example.com/ocean.jpg"     (standard HTTP URI, not data URI scheme)
+#     4. "data:image/;base64,"               (empty subtype token violated '+' quantifier)
+#     5. "image/png;base64,"                 (missing mandatory 'data:' URI scheme prefix)
+# ============================================================================
+
+DATA_URL_PATTERN = r"^data:image/[a-zA-Z0-9\+\.\-]+;base64,"
+DATA_URL_REGEX = re.compile(DATA_URL_PATTERN)
+
+
 def base64_to_pil(img_base64: str) -> Image.Image:
     """
     Safely converts a base64 Data URL or raw base64 string to a PIL Image in RGB format.
@@ -22,7 +53,7 @@ def base64_to_pil(img_base64: str) -> Image.Image:
         raise ValueError("Invalid image input: Expected non-empty base64 string.")
 
     # Strip Data URL scheme if present (e.g., 'data:image/png;base64,...')
-    clean_base64 = re.sub(r"^data:image/[a-zA-Z0-9\+\.\-]+;base64,", "", img_base64.strip())
+    clean_base64 = DATA_URL_REGEX.sub("", img_base64.strip())
 
     try:
         raw_bytes = base64.b64decode(clean_base64)

@@ -54,12 +54,6 @@
           <li class="nav-item {% if request.path == '/visualizations' %}active{% endif %}">
             <a class="nav-link" href="/visualizations">Data & Visualisations</a>
           </li>
-          <li class="nav-item {% if request.path in ['/about', '/mission', '/team'] %}active{% endif %}">
-            <a class="nav-link" href="/about">About</a>
-          </li>
-          <li class="nav-item {% if request.path == '/contact' %}active{% endif %}">
-            <a class="nav-link" href="/contact">Contact</a>
-          </li>
         </ul>
       </div>
     </div>
@@ -96,24 +90,21 @@
           </ul>
         </div>
 
-        <div class="col-lg-2 col-md-3 col-6 mb-4">
-          <h6>Resources</h6>
+        <div class="col-lg-3 col-md-3 col-6 mb-4">
+          <h6>Resources & Visualisations</h6>
           <ul class="list-unstyled small">
             <li class="mb-2"><a href="/visualizations">Tableau Dashboards</a></li>
-            <li class="mb-2"><a href="/about">Research Methodology</a></li>
-            <li class="mb-2"><a href="/about#team">Research Team</a></li>
-            <li class="mb-2"><a href="/contact">Contact & Inquiries</a></li>
+            <li class="mb-2"><a href="/hotspot">GIS Hotspot Explorer</a></li>
+            <li class="mb-2"><a href="/object">Debris Classification</a></li>
+            <li class="mb-2"><a href="/automata">Lifecycle Automata</a></li>
           </ul>
         </div>
 
-        <div class="col-lg-4 col-md-12 mb-4">
-          <h6>Scientific Provenance & Source</h6>
+        <div class="col-lg-3 col-md-12 mb-4">
+          <h6>Scientific Provenance</h6>
           <p class="small text-muted mb-2">
-            Open-source research prototype designed for reproducible marine plastic debris analysis.
+            Academic research prototype designed for quantitative marine plastic debris analysis, spatial gyre prioritization, and observation lifecycle verification.
           </p>
-          <a class="btn btn-sm btn-research-secondary" href="https://github.com/parineeta16/Identification-of-Plastic-Waste-Hotspots-in-and-around-Ocean-Water-using-Machine-Learning" target="_blank" rel="noopener noreferrer">
-            <i class="fab fa-github mr-1"></i> GitHub Repository
-          </a>
         </div>
       </div>
 

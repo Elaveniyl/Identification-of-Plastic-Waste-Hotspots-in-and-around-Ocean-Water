@@ -101,13 +101,13 @@
           </div>
           <div class="research-card-body small text-muted">
             <p class="mb-2">
-              <strong>Single-Object Constraint:</strong> The classifier was trained on isolated debris objects photographed under controlled lighting. Field imagery with heavy wave froth, turbidity, or multiple overlapping objects may yield lower confidence.
+              <strong>Evaluation & Domain Shift:</strong> No accuracy evaluation was run. The model outputs the six TrashNet classes (<code>paper</code>, <code>metal</code>, <code>cardboard</code>, <code>trash</code>, <code>glass</code>, <code>plastic</code>) and appears to have been trained on a TrashNet-style dataset.
             </p>
             <p class="mb-2">
-              <strong>Geographic Decoupling:</strong> Image classification identifies material type only. Spatial coordinates and hotspot prioritization are computed independently via the GIS dataset.
+              <strong>Out-of-Distribution Overconfidence:</strong> Sanity-check test runs on non-marine images (<code>ocean.jpg</code> seascape, <code>Home.jpg</code> banner, <code>asd.jpg</code> logo) were all labelled "plastic" at 70.33% to 97.11%, exhibiting overconfidence on out-of-distribution inputs. These runs were pipeline sanity checks only.
             </p>
             <p class="mb-0">
-              <strong>Platform Compatibility:</strong> Native TensorFlow 1.x graph execution on modern Windows environments requires specialized containerization or registry long path support.
+              <strong>Geographic Decoupling:</strong> Image classification identifies material type only. Oceanic hotspot prioritization is driven independently by the 3,532 Lebreton et al. (2018) GIS survey records.
             </p>
           </div>
         </div>

@@ -104,10 +104,16 @@ class HotspotService:
             S_gpgp: 100 if inside Great Pacific Garbage Patch, else 0
             S_num:  Log10 scaled numerical concentration normalized against reference ceiling (10^6 #/km²)
         
-        Tier Assignment:
+        Tier Assignment (Partitioning feature space into 3 discrete equivalence classes):
             HPI >= 70.0: 'Critical (High)'
             40.0 <= HPI < 70.0: 'Moderate (Medium)'
             HPI < 40.0: 'Baseline (Low)'
+            
+        Theoretical Classification Note:
+            The HPI algorithm is strictly a stateless multi-criteria threshold classifier.
+            It performs static spatial and concentration partitioning into discrete ordinal classes.
+            It is NOT an automaton (it consumes no temporal input symbols and maintains no internal
+            state), contrasting with the stateful discrete-event DFA in observation_fsm.py.
         """
         # Mass sub-score (0 - 100)
         mass_ceiling = 5000.0

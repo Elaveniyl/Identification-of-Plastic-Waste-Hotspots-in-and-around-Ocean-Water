@@ -45,36 +45,34 @@ class PredictionService:
     def _initialize_runtime(self) -> None:
         """
         Attempts to initialize an available inference engine.
-        Documents specific environment blockers if unavailable.
+        Loads retrained_graph.pb into a persistent TensorFlow compat.v1 Session.
         """
         if not self.model_path.exists():
             self.error_detail = f"Model file not found at {self.model_path}"
             return
 
-        # Attempt 1: Check for native TensorFlow 2.x
         try:
-            import tensorflow as tf  # type: ignore
-            # Test graph loading if TF is installed
-            with tf.io.gfile.GFile(str(self.model_path), "rb") as f:
-                graph_def = tf.compat.v1.GraphDef()
-                graph_def.ParseFromString(f.read())
-            self.is_available = True
-            self.runtime_name = "TensorFlow 2.x"
-            return
-        except ImportError:
-            pass
-        except Exception as e:
-            self.error_detail = f"TensorFlow loading failed: {e}"
+            import tensorflow.compat.v1 as tf  # type: ignore
+            tf.disable_v2_behavior()
 
-        # If we reach here, record the exact blocker
-        self.is_available = False
-        self.runtime_name = "None"
-        self.error_detail = (
-            "Inference runtime blocked on Windows Python 3.13: "
-            "Native TensorFlow 2.x installation failed due to Windows MAX_PATH "
-            "limitation (LongPathsEnabled=0 in registry). OpenCV DNN importer does not "
-            "support TensorFlow 1.x Inception PhaseSwitch nodes."
-        )
+            graph_def = tf.GraphDef()
+            with open(self.model_path, "rb") as f:
+                graph_def.ParseFromString(f.read())
+
+            self.graph = tf.Graph()
+            with self.graph.as_default():
+                tf.import_graph_def(graph_def, name="")
+                self.session = tf.Session(graph=self.graph)
+                self.softmax_tensor = self.graph.get_tensor_by_name("final_result:0")
+
+            self.is_available = True
+            self.runtime_name = "TensorFlow 2.x (compat.v1 GraphDef)"
+            self.error_detail = None
+            return
+        except Exception as e:
+            self.is_available = False
+            self.runtime_name = "None"
+            self.error_detail = f"TensorFlow initialization failed: {e}"
 
     def preprocess_image(self, image_input: Union[Image.Image, bytes]) -> np.ndarray:
         """
@@ -113,17 +111,7 @@ class PredictionService:
         Executes prediction on image. Returns verified result or structured runtime report.
         Never fabricates predictions.
         """
-        # Validate that image can be preprocessed
-        try:
-            tensor = self.preprocess_image(image_input)
-        except ValueError as err:
-            return {
-                "status": "error",
-                "error": str(err),
-                "http_status": 400
-            }
-
-        if not self.is_available:
+        if not self.is_available or not hasattr(self, "session"):
             return {
                 "status": "unavailable",
                 "error": "Inference engine currently unavailable on this host.",
@@ -138,13 +126,53 @@ class PredictionService:
                 "http_status": 503
             }
 
-        # If runtime is available: execute actual session
-        # (Reserved for when TF or ONNX is loaded)
-        return {
-            "status": "error",
-            "error": "Runtime not configured for execution.",
-            "http_status": 500
-        }
+        try:
+            if isinstance(image_input, bytes):
+                img = Image.open(BytesIO(image_input))
+            elif isinstance(image_input, Image.Image):
+                img = image_input
+            else:
+                return {
+                    "status": "error",
+                    "error": "Unsupported image input type.",
+                    "http_status": 400
+                }
+
+            if img.mode != "RGB":
+                img = img.convert("RGB")
+
+            # Encode as JPEG bytes for DecodeJpeg/contents:0 tensor
+            buf = BytesIO()
+            img.save(buf, format="JPEG")
+            jpeg_bytes = buf.getvalue()
+
+            raw_preds = self.session.run(
+                self.softmax_tensor,
+                {"DecodeJpeg/contents:0": jpeg_bytes}
+            )[0]
+
+            pred_dict = {
+                self.labels[i]: round(float(raw_preds[i]), 6)
+                for i in range(min(len(self.labels), len(raw_preds)))
+            }
+            top_idx = int(np.argmax(raw_preds))
+            top_label = self.labels[top_idx] if top_idx < len(self.labels) else "unknown"
+            top_score = float(raw_preds[top_idx])
+
+            return {
+                "status": "success",
+                "result": f"{top_label} ({top_score:.2%})",
+                "top_label": top_label,
+                "top_score": round(top_score, 6),
+                "predictions": pred_dict,
+                "http_status": 200
+            }
+        except Exception as e:
+            return {
+                "status": "error",
+                "error": f"Prediction execution failed: {str(e)}",
+                "http_status": 500
+            }
 
     def get_status(self) -> Dict[str, Any]:
         """Returns diagnostic status of the prediction subsystem."""

@@ -6,7 +6,18 @@ Flask-SQLAlchemy>=3.1.0
 SQLAlchemy>=2.0.0
 Pillow>=10.0.0
 numpy>=2.0.0
+# Note on Windows: Standard pip extraction of tensorflow-2.21.0-cp313-cp313-win_amd64.whl fails 
+# on Windows hosts where LongPathsEnabled=0 in the registry due to deep C++ headers in
+# tensorflow/include/external/com_github_grpc_grpc/... exceeding MAX_PATH (260 chars).
+# Workaround: The wheel was unpacked into .venv/Lib/site-packages omitting the unused
+# tensorflow/include developer headers, since runtime execution only requires Python modules and DLLs.
+tensorflow>=2.21.0
+python-docx>=1.1.0
+matplotlib>=3.10.0
+networkx>=3.4.0
 onnxruntime>=1.20.0
 opencv-python-headless>=4.10.0
 Werkzeug>=3.1.0
 Jinja2>=3.1.0
+
+

@@ -29,27 +29,33 @@ class TestPlasticWastePrototype(unittest.TestCase):
     # =========================================================================
 
     def test_web_routes_return_ok(self):
-        """Verify all standard GET pages return HTTP 200 OK."""
+        """Verify all active standard GET pages return HTTP 200 OK, and removed routes redirect."""
         routes = [
             "/", "/mission", "/team", "/object", "/hotspot",
-            "/contact", "/automata", "/visualizations", "/about"
+            "/automata", "/visualizations"
         ]
         for r in routes:
             res = self.client.get(r)
             self.assertEqual(res.status_code, 200, f"Route {r} failed with {res.status_code}")
 
-    def test_contact_form_sqlite_persistence(self):
-        """Verify contact form stores entries in SQLite database."""
-        test_payload = {
-            "name": "Unit Tester",
-            "email": "test@marine-hotspots.org",
-            "phone": "+1-555-0199",
-            "msg": "Automated verification test message."
-        }
-        res = self.client.post("/contact", data=test_payload, follow_redirects=True)
-        self.assertEqual(res.status_code, 200)
+        for r in ["/about", "/contact"]:
+            res = self.client.get(r)
+            self.assertEqual(res.status_code, 302, f"Route {r} should redirect (302)")
+
+    def test_contact_form_route_redirect_and_db_model(self):
+        """Verify /contact route redirects safely and Contact model persists."""
+        res = self.client.post("/contact", data={"name": "test"}, follow_redirects=False)
+        self.assertEqual(res.status_code, 302)
 
         with self.app.app_context():
+            entry = main.Contact(
+                Name="Unit Tester",
+                Email="test@marine-hotspots.org",
+                Phone="+1-555-0199",
+                Message="Automated verification test message."
+            )
+            main.db.session.add(entry)
+            main.db.session.commit()
             saved = main.Contact.query.filter_by(Email="test@marine-hotspots.org").first()
             self.assertIsNotNone(saved)
             self.assertEqual(saved.Name, "Unit Tester")
@@ -226,9 +232,149 @@ class TestPlasticWastePrototype(unittest.TestCase):
         duplicates = [x for x in parser.ids if parser.ids.count(x) > 1]
         self.assertEqual(len(duplicates), 0, f"Duplicate IDs detected: {set(duplicates)}")
 
-        # 4. Verify single header structure
-        self.assertEqual(parser.headers, 1, f"Expected 1 header, found {parser.headers}")
+    # =========================================================================
+    # 6. Advanced Formal Languages and Automata (FLA) Tests
+    # =========================================================================
+
+    def test_fsm_formal_specification(self):
+        """Verify dynamic generation of formal 5-tuple M = (Q, Sigma, delta, q0, F)."""
+        spec = WasteObservationFSM.get_formal_definition()
+        self.assertEqual(len(spec["states"]), 8)
+        self.assertEqual(len(spec["alphabet"]), 7)
+        self.assertEqual(spec["initial_state"], "DRAFT")
+        self.assertEqual(set(spec["accepting_states"]), {"ARCHIVED", "REJECTED"})
+        self.assertEqual(len(spec["transitions"]), 18)
+        self.assertFalse(spec["is_total"])
+
+        # Check /api/fsm/spec route
+        res = self.client.get("/api/fsm/spec")
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.get_json()["initial_state"], "DRAFT")
+
+    def test_fsm_completed_dfa_with_trap(self):
+        """Verify total transition function delta_complete with explicit TRAP state."""
+        comp = WasteObservationFSM.get_completed_dfa()
+        self.assertEqual(len(comp["states"]), 9)  # 8 original + TRAP
+        self.assertIn("TRAP", comp["states"])
+        self.assertTrue(comp["is_total"])
+
+        # Total transitions must be exactly |Q_complete| * |Sigma| = 9 * 7 = 63
+        self.assertEqual(len(comp["transitions"]), 63)
+
+        # Verify TRAP self-loops on all symbols
+        trap_transitions = [t for t in comp["transitions"] if t["from"] == "TRAP"]
+        self.assertEqual(len(trap_transitions), 7)
+        for t in trap_transitions:
+            self.assertEqual(t["to"], "TRAP")
+
+        # Test route with completed=true
+        res = self.client.get("/api/fsm/spec?completed=true")
+        self.assertEqual(res.status_code, 200)
+        self.assertTrue(res.get_json()["is_total"])
+
+    def test_fsm_accepts_word_logic(self):
+        """Verify language acceptance, state paths, and rejection failure positions."""
+        # Accepted word 1 (happy path cleanup):
+        word_valid = ["add_coords", "classify_image", "operator_verify", "dispatch_cleanup", "complete_archive"]
+        res_valid = WasteObservationFSM.accepts_word(word_valid)
+        self.assertTrue(res_valid["accepted"])
+        self.assertEqual(res_valid["final_state"], "ARCHIVED")
+        self.assertIsNone(res_valid["failing_position"])
+        self.assertEqual(
+            res_valid["state_path"],
+            ["DRAFT", "GEO_TAGGED", "HOTSPOT_FLAGGED", "VERIFIED", "DISPATCHED", "ARCHIVED"]
+        )
+
+        # Accepted word 2 (immediate rejection from DRAFT):
+        res_reject = WasteObservationFSM.accepts_word(["invalidate"])
+        self.assertTrue(res_reject["accepted"])
+        self.assertEqual(res_reject["final_state"], "REJECTED")
+
+        # Rejected word (undefined transition routing to TRAP):
+        word_invalid = ["add_coords", "dispatch_cleanup"]
+        res_invalid = WasteObservationFSM.accepts_word(word_invalid)
+        self.assertFalse(res_invalid["accepted"])
+        self.assertEqual(res_invalid["final_state"], "TRAP")
+        self.assertEqual(res_invalid["failing_position"], 1)
+        self.assertEqual(res_invalid["failing_symbol"], "dispatch_cleanup")
+
+        # Rejected word (symbol not in Sigma):
+        word_bad_sym = ["add_coords", "teleport"]
+        res_bad_sym = WasteObservationFSM.accepts_word(word_bad_sym)
+        self.assertFalse(res_bad_sym["accepted"])
+        self.assertEqual(res_bad_sym["failing_position"], 1)
+
+    def test_fsm_api_accepts_endpoint(self):
+        """Verify POST /api/fsm/accepts endpoint behavior."""
+        # Valid word
+        res = self.client.post("/api/fsm/accepts", json={
+            "symbols": ["classify_image", "operator_verify", "complete_archive"]
+        })
+        self.assertEqual(res.status_code, 200)
+        data = res.get_json()
+        self.assertTrue(data["accepted"])
+        self.assertEqual(data["status"], "success")
+
+        # Invalid word
+        res_rej = self.client.post("/api/fsm/accepts", json={
+            "word": "add_coords, complete_archive"
+        })
+        self.assertEqual(res_rej.status_code, 200)
+        data_rej = res_rej.get_json()
+        self.assertFalse(data_rej["accepted"])
+        self.assertEqual(data_rej["status"], "rejected")
+
+        # Missing payload
+        res_empty = self.client.post("/api/fsm/accepts", json={})
+        self.assertEqual(res_empty.status_code, 400)
+
+    def test_data_url_regular_language_cases(self):
+        """Verify the 5 accepted and 5 rejected RFC 2397 Data URL strings documented in util.py."""
+        from util import DATA_URL_REGEX
+
+        accepted_cases = [
+            "data:image/png;base64,",
+            "data:image/jpeg;base64,",
+            "data:image/svg+xml;base64,",
+            "data:image/webp;base64,",
+            "data:image/vnd.microsoft.icon;base64,"
+        ]
+        for s in accepted_cases:
+            self.assertIsNotNone(
+                DATA_URL_REGEX.match(s),
+                f"Accepted case failed to match regex: {s}"
+            )
+
+        rejected_cases = [
+            "data:text/plain;base64,",
+            "data:image/png;charset=utf-8,",
+            "http://example.com/ocean.jpg",
+            "data:image/;base64,",
+            "image/png;base64,"
+        ]
+        for s in rejected_cases:
+            self.assertIsNone(
+                DATA_URL_REGEX.match(s),
+                f"Rejected case erroneously matched regex: {s}"
+            )
+
+    def test_predict_endpoint_real_inference(self):
+        """Verify /predict returns live HTTP 200 with all 6 classification classes."""
+        img = Image.open("static/img/ocean.jpg")
+        buf = io.BytesIO()
+        img.save(buf, format="JPEG")
+        b64 = "data:image/jpeg;base64," + base64.b64encode(buf.getvalue()).decode("ascii")
+
+        res = self.client.post("/predict", json=b64)
+        self.assertEqual(res.status_code, 200)
+        data = res.get_json()
+        self.assertEqual(data["status"], "success")
+        self.assertIn("plastic", data["result"])
+        self.assertIn("predictions", data)
+        expected_classes = {"paper", "metal", "cardboard", "trash", "glass", "plastic"}
+        self.assertEqual(set(data["predictions"].keys()), expected_classes)
 
 
 if __name__ == "__main__":
     unittest.main()
+

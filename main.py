@@ -7,7 +7,7 @@ import json
 import os
 from datetime import datetime, timezone
 from pathlib import Path
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 
 from util import base64_to_pil
@@ -67,26 +67,7 @@ def home():
 
 @app.route("/contact", methods=["GET", "POST"])
 def contact():
-    status_msg = None
-    if request.method == "POST":
-        try:
-            name = request.form.get("name", "").strip()
-            email = request.form.get("email", "").strip()
-            phone = request.form.get("phone", "").strip()
-            message = request.form.get("msg", "").strip()
-
-            if name and email and message:
-                entry = Contact(Name=name, Phone=phone, Message=message, Date=datetime.now(timezone.utc), Email=email)
-                db.session.add(entry)
-                db.session.commit()
-                status_msg = "Thank you! Your message has been received."
-            else:
-                status_msg = "Please fill out all required fields."
-        except Exception as e:
-            db.session.rollback()
-            status_msg = f"Notice: Message could not be recorded ({str(e)})"
-
-    return render_template("contact.html", status_msg=status_msg)
+    return redirect(url_for("home"))
 
 
 @app.route("/mission")
@@ -121,7 +102,7 @@ def visualizations():
 
 @app.route("/about")
 def about():
-    return render_template("about.html")
+    return redirect(url_for("home"))
 
 
 # ============================================================================
@@ -208,18 +189,10 @@ def api_hotspot_clusters():
 @app.route("/api/fsm/spec", methods=["GET"])
 def api_fsm_spec():
     """Returns the formal 5-tuple specification of the FLA observation automaton."""
-    return jsonify(
-        formal_specification={
-            "states_Q": sorted(WasteObservationFSM.STATES),
-            "alphabet_Sigma": sorted(WasteObservationFSM.ALPHABET),
-            "start_state_q0": WasteObservationFSM.INITIAL_STATE,
-            "accepting_states_F": sorted(WasteObservationFSM.ACCEPTING_STATES),
-            "transition_rules_delta": [
-                {"from_state": src, "input_symbol": sym, "to_state": dest}
-                for (src, sym), dest in sorted(WasteObservationFSM.TRANSITIONS.items())
-            ]
-        }
-    )
+    include_completed = request.args.get("completed", "false").lower() in ("true", "1")
+    if include_completed:
+        return jsonify(WasteObservationFSM.get_completed_dfa())
+    return jsonify(WasteObservationFSM.get_formal_definition())
 
 
 @app.route("/api/fsm/transition", methods=["POST"])
@@ -250,6 +223,30 @@ def api_fsm_transition():
             current_state=current_state,
             symbol=symbol
         ), 400
+
+
+@app.route("/api/fsm/accepts", methods=["POST"])
+def api_fsm_accepts():
+    """
+    Evaluates whether an input word w ∈ Σ* is accepted by the formal DFA.
+    Accepts JSON payload:
+        {"symbols": ["add_coords", "classify_image", "operator_verify", "complete_archive"]}
+    or  {"word": "add_coords, classify_image, operator_verify, complete_archive"}
+    Returns acceptance status, state traversal path, and rejection failure position if applicable.
+    """
+    data = request.get_json(silent=True) or {}
+    symbols = data.get("symbols")
+    if symbols is None:
+        symbols = data.get("word")
+    if symbols is None:
+        return jsonify(error="Missing required field 'symbols' or 'word'", status="error"), 400
+
+    result = WasteObservationFSM.accepts_word(symbols)
+    return jsonify(
+        status="success" if result["accepted"] else "rejected",
+        **result
+    )
+
 
 
 # ============================================================================

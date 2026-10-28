@@ -14,7 +14,7 @@ Formal Definition:
     F: Accepting / Terminal states (ARCHIVED, REJECTED)
 """
 
-from typing import Dict, Set, Tuple, List, Optional
+from typing import Dict, Set, Tuple, List, Optional, Union, Any
 
 
 class InvalidTransitionError(ValueError):
@@ -26,25 +26,11 @@ class WasteObservationFSM:
     """
     Deterministic Finite Automaton for Waste Observation Lifecycle.
     
-    States (Q):
-        - DRAFT: Initial raw submission without verified coordinates or classification.
-        - GEO_TAGGED: Observation bound to verified WGS84 coordinates.
-        - CLASSIFIED: Visual classifier has completed inference on waste material.
-        - HOTSPOT_FLAGGED: Spatial concentration exceeds priority threshold.
-        - VERIFIED: Observation validated by GIS operator / survey team.
-        - DISPATCHED: Clean-up / remediation resources assigned to location.
-        - ARCHIVED: Observation completed, documented, and archived (Accepting state).
-        - REJECTED: Observation rejected due to corrupt data, out-of-bounds, or invalid survey (Accepting state).
-    
-    Alphabet (Σ):
-        - 'add_coords': Attach verified latitude and longitude.
-        - 'classify_image': Run visual classifier on observation imagery.
-        - 'flag_hotspot': Spatial analysis confirms high plastic concentration.
-        - 'operator_verify': Manual or algorithmic validation of observation.
-        - 'dispatch_cleanup': Assign field intervention team.
-        - 'complete_archive': Clean-up finished or baseline record archived.
-        - 'invalidate': Reject observation due to invalid data or false alarm.
+    Formal Definition:
+        M = (Q, Σ, δ, q_0, F)
     """
+
+    TRAP_STATE: str = "TRAP"
 
     STATES: Set[str] = {
         "DRAFT",
@@ -166,4 +152,127 @@ class WasteObservationFSM:
                 {"from": h[0], "symbol": h[1], "to": h[2]}
                 for h in self.history
             ]
+        }
+
+    @classmethod
+    def get_formal_definition(cls) -> Dict[str, Any]:
+        """
+        Returns the formal 5-tuple M = (Q, Σ, δ, q_0, F) dynamically extracted from the class definition.
+        """
+        transitions_list = [
+            {"from": src, "symbol": sym, "to": dst}
+            for (src, sym), dst in sorted(cls.TRANSITIONS.items())
+        ]
+        return {
+            "states": sorted(list(cls.STATES)),
+            "alphabet": sorted(list(cls.ALPHABET)),
+            "initial_state": cls.INITIAL_STATE,
+            "accepting_states": sorted(list(cls.ACCEPTING_STATES)),
+            "transitions": transitions_list,
+            "is_total": False,
+            "trap_state": cls.TRAP_STATE
+        }
+
+    @classmethod
+    def get_completed_dfa(cls) -> Dict[str, Any]:
+        """
+        Transforms the partial transition function δ into a total transition function δ_complete
+        by explicitly routing all undefined (q, σ) pairs to a trap/dead sink state (TRAP).
+        For the TRAP state, δ_complete(TRAP, σ) = TRAP for all σ ∈ Σ.
+        """
+        complete_states = sorted(list(cls.STATES | {cls.TRAP_STATE}))
+        alphabet = sorted(list(cls.ALPHABET))
+        complete_transitions = {}
+
+        for state in complete_states:
+            for sym in alphabet:
+                if state == cls.TRAP_STATE:
+                    complete_transitions[(state, sym)] = cls.TRAP_STATE
+                else:
+                    complete_transitions[(state, sym)] = cls.TRANSITIONS.get((state, sym), cls.TRAP_STATE)
+
+        transitions_list = [
+            {"from": src, "symbol": sym, "to": dst}
+            for (src, sym), dst in sorted(complete_transitions.items())
+        ]
+
+        return {
+            "states": complete_states,
+            "alphabet": alphabet,
+            "initial_state": cls.INITIAL_STATE,
+            "accepting_states": sorted(list(cls.ACCEPTING_STATES)),
+            "trap_state": cls.TRAP_STATE,
+            "transitions": transitions_list,
+            "is_total": True
+        }
+
+    @classmethod
+    def accepts_word(cls, symbols: Union[str, List[str]]) -> Dict[str, Any]:
+        """
+        Evaluates whether an input word w ∈ Σ* is accepted by M = (Q, Σ, δ, q_0, F).
+        Returns:
+            accepted (bool): True if execution ends in an accepting state F.
+            final_state (str): The state reached after processing or trap.
+            state_path (List[str]): Sequence of states visited [q_0, q_1, ..., q_k].
+            failing_position (Optional[int]): 0-indexed position of rejected symbol or end if not accepted.
+            failing_symbol (Optional[str]): Symbol that caused transition failure.
+            error (Optional[str]): Diagnostic message detailing rejection reason.
+        """
+        if isinstance(symbols, str):
+            if not symbols.strip():
+                sym_list = []
+            elif "," in symbols:
+                sym_list = [s.strip() for s in symbols.split(",") if s.strip()]
+            else:
+                sym_list = symbols.strip().split()
+        elif isinstance(symbols, (list, tuple)):
+            sym_list = list(symbols)
+        else:
+            return {
+                "accepted": False,
+                "final_state": cls.INITIAL_STATE,
+                "state_path": [cls.INITIAL_STATE],
+                "failing_position": 0,
+                "failing_symbol": None,
+                "error": f"Invalid input type: expected str or list, got {type(symbols).__name__}"
+            }
+
+        curr = cls.INITIAL_STATE
+        path = [curr]
+
+        for idx, sym in enumerate(sym_list):
+            if sym not in cls.ALPHABET:
+                path.append(cls.TRAP_STATE)
+                return {
+                    "accepted": False,
+                    "final_state": cls.TRAP_STATE,
+                    "state_path": path,
+                    "failing_position": idx,
+                    "failing_symbol": sym,
+                    "error": f"Symbol '{sym}' at position {idx} is not in alphabet Σ."
+                }
+
+            key = (curr, sym)
+            if key not in cls.TRANSITIONS:
+                path.append(cls.TRAP_STATE)
+                return {
+                    "accepted": False,
+                    "final_state": cls.TRAP_STATE,
+                    "state_path": path,
+                    "failing_position": idx,
+                    "failing_symbol": sym,
+                    "error": f"Undefined transition δ('{curr}', '{sym}') at position {idx} routes to {cls.TRAP_STATE}."
+                }
+
+            curr = cls.TRANSITIONS[key]
+            path.append(curr)
+
+        is_acc = curr in cls.ACCEPTING_STATES
+        return {
+            "accepted": is_acc,
+            "final_state": curr,
+            "state_path": path,
+            "failing_position": None if is_acc else len(sym_list),
+            "failing_symbol": None,
+            "error": None if is_acc else f"Execution completed in non-accepting state '{curr}'."
         }
